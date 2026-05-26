@@ -20,6 +20,7 @@ class SnakeEnv(gym.Env):
     def __init__(
         self,
         grid_size: int = GRID_SIZE,
+        max_steps_no_food: Optional[int] = None,
         render_mode: Optional[str] = None,
     ):
         super().__init__()
@@ -34,7 +35,7 @@ class SnakeEnv(gym.Env):
         )
         self.action_space = spaces.Discrete(4)
 
-        self._game = SnakeGame(grid_size=grid_size)
+        self._game = SnakeGame(grid_size=grid_size, max_steps_no_food=max_steps_no_food)
         self._prev_head_ch: Optional[np.ndarray] = None
         self._prev_body_grad_ch: Optional[np.ndarray] = None
 
@@ -69,7 +70,7 @@ class SnakeEnv(gym.Env):
         self._prev_head_ch = current_obs[0].copy()
         self._prev_body_grad_ch = current_obs[1].copy()
 
-        reward, terminated, info = self._game.step(int(action))
+        reward, terminated, truncated, info = self._game.step(int(action))
         self._last_reward = reward
         self._episode_reward += reward
 
@@ -79,7 +80,7 @@ class SnakeEnv(gym.Env):
         if self.render_mode == "human":
             self.render()
 
-        return obs, reward, terminated, False, info
+        return obs, reward, terminated, truncated, info
 
     def render(self) -> None:
         if self._renderer is None:

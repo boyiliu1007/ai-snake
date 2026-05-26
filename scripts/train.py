@@ -43,7 +43,7 @@ def main() -> None:
         buffer_capacity=args.buffer,
     )
 
-    env = SnakeEnv(grid_size=cfg.grid_size, render_mode=None)
+    env = SnakeEnv(grid_size=cfg.grid_size, max_steps_no_food=cfg.max_steps_no_food, render_mode=None)
 
     agent = RainbowAgent(
         in_channels=N_CHANNELS,
