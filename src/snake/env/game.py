@@ -15,8 +15,9 @@ class SnakeGame:
     Snake deque: index 0 = head, index -1 = tail.
     """
 
-    def __init__(self, grid_size: int = GRID_SIZE, seed: Optional[int] = None):
+    def __init__(self, grid_size: int = GRID_SIZE, max_steps_no_food: Optional[int] = None, seed: Optional[int] = None):
         self.grid_size = grid_size
+        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size
         self._rng = random.Random(seed)
 
         self.snake: deque[tuple[int, int]] = deque()
@@ -44,9 +45,9 @@ class SnakeGame:
         self._done = False
         self._place_food()
 
-    def step(self, action: int) -> tuple[float, bool, dict]:
+    def step(self, action: int) -> tuple[float, bool, bool, dict]:
         """
-        Returns (reward, terminated, info).
+        Returns (reward, terminated, truncated, info).
         Silently ignores reversal attempts (keeps current direction).
         """
         if action == _OPPOSITE[self.direction]:
@@ -60,15 +61,20 @@ class SnakeGame:
         self.steps += 1
         self.steps_since_meal += 1
 
+        # Truncation — too many steps without food means the snake is circling
+        if self.steps_since_meal >= self.max_steps_no_food:
+            self._done = True
+            return -1.0, False, True, self._info()
+
         # Wall collision
         if not (0 <= new_head[0] < self.grid_size and 0 <= new_head[1] < self.grid_size):
             self._done = True
-            return -10.0, True, self._info()
+            return -10.0, True, False, self._info()
 
         # Self-collision — tail moves away this step so exclude it
         if new_head in set(list(self.snake)[:-1]):
             self._done = True
-            return -10.0, True, self._info()
+            return -10.0, True, False, self._info()
 
         self.snake.appendleft(new_head)
 
@@ -81,7 +87,7 @@ class SnakeGame:
             self.snake.pop()
 
         reward = self._step_reward(ate_food)
-        return reward, False, self._info()
+        return reward, False, False, self._info()
 
     @property
     def done(self) -> bool:

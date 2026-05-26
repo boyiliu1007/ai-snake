@@ -6,6 +6,7 @@ from pathlib import Path
 class RainbowConfig:
     # ---- Environment ----
     grid_size: int = 12
+    max_steps_no_food: int = 144        # grid_size² — truncates circling episodes
 
     # ---- Training schedule ----
     total_steps: int = 1_000_000
