@@ -1,14 +1,12 @@
 """
-Entry point for training.
-
-Usage:
-    uv run python scripts/train.py
-    uv run python scripts/train.py --steps 500000 --run-dir runs/exp_01
+Entry point for training (Vectorized Environments).
 """
 import argparse
 import sys
 from pathlib import Path
-
+import gymnasium as gym
+import torch
+torch.set_num_threads(1)
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from snake.agent.rainbow import RainbowAgent
@@ -17,19 +15,25 @@ from snake.env.snake_env import SnakeEnv
 from snake.training.config import RainbowConfig
 from snake.training.trainer import Trainer
 
-
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--steps",     type=int,   default=1_000_000)
     p.add_argument("--run-dir",   type=str,   default="runs/rainbow_baseline")
     p.add_argument("--lr",        type=float, default=1e-4)
-    p.add_argument("--batch",     type=int,   default=32)
+    p.add_argument("--batch",     type=int,   default=128)
     p.add_argument("--n-step",    type=int,   default=3)
     p.add_argument("--buffer",    type=int,   default=100_000)
     p.add_argument("--resume",    type=str,   default=None,
                    help="Path to checkpoint .pt to resume from")
+    p.add_argument("--num-envs",  type=int,   default=16,
+                   help="Number of parallel environments to run")
     return p.parse_args()
 
+# 建立獨立環境的工廠函數
+def make_env(grid_size, max_steps_no_food):
+    def _init():
+        return SnakeEnv(grid_size=grid_size, max_steps_no_food=max_steps_no_food, render_mode=None)
+    return _init
 
 def main() -> None:
     args = parse_args()
@@ -43,11 +47,16 @@ def main() -> None:
         buffer_capacity=args.buffer,
     )
 
-    env = SnakeEnv(grid_size=cfg.grid_size, max_steps_no_food=cfg.max_steps_no_food, render_mode=None)
+    print(f"啟動 {args.num_envs} 個平行遊戲環境中...")
+    
+    # 這裡就是關鍵：把單一環境變成 16 個平行進程
+    envs = gym.vector.AsyncVectorEnv([
+        make_env(cfg.grid_size, cfg.max_steps_no_food) for _ in range(args.num_envs)
+    ])
 
     agent = RainbowAgent(
         in_channels=N_CHANNELS,
-        n_actions=int(env.action_space.n),
+        n_actions=4, 
         grid_size=cfg.grid_size,
         buffer_capacity=cfg.buffer_capacity,
         per_alpha=cfg.per_alpha,
@@ -60,9 +69,8 @@ def main() -> None:
         agent.load(args.resume)
         print(f"Resumed from {args.resume}")
 
-    trainer = Trainer(agent, env, cfg)
+    trainer = Trainer(agent, envs, cfg)
     trainer.train()
-
 
 if __name__ == "__main__":
     main()

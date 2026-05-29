@@ -19,7 +19,7 @@ class RainbowConfig:
 
     # ---- RL ----
     gamma: float = 0.99
-    n_step: int = 3
+    n_step: int = 5
 
     # ---- PER ----
     buffer_capacity: int = 100_000
@@ -31,7 +31,7 @@ class RainbowConfig:
     # ---- Exploration (ε-greedy) ----
     epsilon_start: float = 1.0
     epsilon_end: float = 0.05
-    epsilon_decay_steps: int = 200_000
+    epsilon_decay_steps: int = 1_000_000
 
     # ---- Target network ----
     target_update_freq: int = 1_000  # hard update every N env steps

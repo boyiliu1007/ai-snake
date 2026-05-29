@@ -124,16 +124,14 @@ class SnakeGame:
 
     def _step_reward(self, ate_food: bool) -> float:
         length = len(self.snake)
-        head = self.snake[0]
-        dist = abs(head[0] - self.food[0]) + abs(head[1] - self.food[1])
 
+        # 1. 吃到食物給予大獎勵 (依長度增加，鼓勵牠挑戰變長)
         if ate_food:
-            return min(0.5 * length, 10.0)
+            return min(1.0 + 0.5 * length, 15.0)
 
-        return (
-            -0.05 * (dist / length)
-            - 0.1 * (self.steps_since_meal / length)
-        )
+        # 2. 純粹的生存壓力：每走一步固定微幅扣分
+        # 不給麵包屑，就是逼迫牠用最快的速度去吃食物！
+        return -0.01
 
     def _info(self) -> dict:
         return {
