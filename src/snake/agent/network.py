@@ -14,15 +14,18 @@ class _CNN(nn.Module):
         self.net = nn.Sequential(
             nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+
+            nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2),
             nn.ReLU(),
+
             nn.Conv2d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.Flatten(),
-            nn.Linear(64 * grid_size * grid_size, 512),
+
+            nn.Linear(64 * (grid_size // 2) * (grid_size // 2), 256),
             nn.ReLU(),
         )
-        self.out_dim = 512
+        self.out_dim = 256
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)

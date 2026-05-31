@@ -16,13 +16,16 @@ from snake.training.config import RainbowConfig
 from snake.training.trainer import Trainer
 
 def parse_args() -> argparse.Namespace:
+    default_cfg = RainbowConfig()
+    
     p = argparse.ArgumentParser()
-    p.add_argument("--steps",     type=int,   default=1_000_000)
-    p.add_argument("--run-dir",   type=str,   default="runs/rainbow_baseline")
-    p.add_argument("--lr",        type=float, default=1e-4)
-    p.add_argument("--batch",     type=int,   default=128)
-    p.add_argument("--n-step",    type=int,   default=3)
-    p.add_argument("--buffer",    type=int,   default=100_000)
+    # 2. 將所有的 default 改為對應的 default_cfg 屬性
+    p.add_argument("--steps",     type=int,   default=default_cfg.total_steps)
+    p.add_argument("--run-dir",   type=str,   default=default_cfg.run_dir)
+    p.add_argument("--lr",        type=float, default=default_cfg.lr)
+    p.add_argument("--batch",     type=int,   default=default_cfg.batch_size)
+    p.add_argument("--n-step",    type=int,   default=default_cfg.n_step)
+    p.add_argument("--buffer",    type=int,   default=default_cfg.buffer_capacity)
     p.add_argument("--resume",    type=str,   default=None,
                    help="Path to checkpoint .pt to resume from")
     p.add_argument("--num-envs",  type=int,   default=16,

@@ -140,7 +140,7 @@ class PrioritizedReplayBuffer:
         next_state: np.ndarray,
         done: bool,
     ) -> None:
-        priority = self._max_priority ** self.alpha
+        priority = self._max_priority 
         self._tree.add(priority, (state, action, reward, next_state, done))
 
     # ---- read ----

@@ -3,9 +3,9 @@ from typing import Optional
 import random
 
 GRID_SIZE = 12
-DEATH_LAMBDA = 10.0   # peak death penalty  (grid empty, length=3 → ~-9.8)
+DEATH_LAMBDA = 1   # peak death penalty  (grid empty, length=3 → ~-9.8)
 DEATH_MIN    = 1.0    # floor death penalty (grid full  → -1.0)
-TRUNC_LAMBDA = 1.0    # peak truncation penalty
+TRUNC_LAMBDA = 1   # peak truncation penalty
 TRUNC_MIN    = 0.1    # floor truncation penalty
 
 UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
@@ -21,7 +21,7 @@ class SnakeGame:
 
     def __init__(self, grid_size: int = GRID_SIZE, max_steps_no_food: Optional[int] = None, seed: Optional[int] = None):
         self.grid_size = grid_size
-        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size
+        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size * 2
         self._rng = random.Random(seed)
 
         self.snake: deque[tuple[int, int]] = deque()
@@ -59,7 +59,8 @@ class SnakeGame:
         self.direction = action
 
         dr, dc = _DELTA[action]
-        hr, hc = self.snake[0]
+        old_head = self.snake[0]
+        hr, hc = old_head
         new_head = (hr + dr, hc + dc)
 
         self.steps += 1
@@ -90,7 +91,7 @@ class SnakeGame:
         else:
             self.snake.pop()
 
-        reward = self._step_reward(ate_food)
+        reward = self._step_reward(ate_food, old_head)
         return reward, False, False, self._info()
 
     @property
@@ -118,20 +119,13 @@ class SnakeGame:
         Near-empty grid → penalty ≈ -lam  (dying/circling is avoidable → punish hard).
         Near-full grid  → penalty = -floor (barely any room left → punish lightly).
         """
-        grid_cells = self.grid_size * self.grid_size
-        free_ratio = (grid_cells - len(self.snake)) / grid_cells
-        return -max(floor, lam * free_ratio)
+        return -lam
 
-    def _step_reward(self, ate_food: bool) -> float:
-        length = len(self.snake)
-
-        # 1. 吃到食物給予大獎勵 (依長度增加，鼓勵牠挑戰變長)
+    def _step_reward(self, ate_food: bool, old_head: tuple[int, int]) -> float:
         if ate_food:
-            return min(1.0 + 0.5 * length, 15.0)
+            return 1.0 + 0.05 * len(self.snake) 
 
-        # 2. 純粹的生存壓力：每走一步固定微幅扣分
-        # 不給麵包屑，就是逼迫牠用最快的速度去吃食物！
-        return -0.01
+        return -0.01  
 
     def _info(self) -> dict:
         return {

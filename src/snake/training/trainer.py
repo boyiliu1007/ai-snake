@@ -23,6 +23,22 @@ class Trainer:
 
     def train(self) -> None:
         cfg = self.cfg
+        
+        # 🎯 在这里添加
+        print("\n" + "="*60)
+        print("🚀 Training Configuration")
+        print("="*60)
+        print(f"Total Steps:        {cfg.total_steps:,}")
+        print(f"Batch Size:         {cfg.batch_size}")
+        print(f"Learning Rate:      {cfg.lr}")
+        print(f"Buffer Capacity:    {cfg.buffer_capacity:,}")
+        print(f"Grid Size:          {cfg.grid_size}")
+        print(f"Warmup Steps:       {cfg.warmup_steps:,}")
+        print(f"Log Frequency:      {cfg.log_freq:,}")
+        print(f"Checkpoint Freq:    {cfg.checkpoint_freq:,}")
+        print(f"Run Directory:      {cfg.run_dir}")
+        print("="*60 + "\n")
+        
         obs, _ = self.env.reset()
         
         num_envs = obs.shape[0] 
@@ -44,7 +60,7 @@ class Trainer:
 
         global_step = 0
         steps_since_log = 0  # 👈 新增：用來精準計算 sps 的計數器
-
+        step = 0
         try:
             while global_step < cfg.total_steps:
                 epsilon = cfg.epsilon(global_step)
