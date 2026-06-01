@@ -24,7 +24,7 @@ class Evaluator:
             ep_reward = 0.0
 
             while not done:
-                action = self.agent.select_action(obs, epsilon=0.0)
+                action = self.agent.select_action(obs, evaluate=True)
                 obs, reward, terminated, truncated, info = self._env.step(action)
                 done = terminated or truncated
                 ep_reward += reward

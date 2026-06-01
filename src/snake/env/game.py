@@ -21,7 +21,7 @@ class SnakeGame:
 
     def __init__(self, grid_size: int = GRID_SIZE, max_steps_no_food: Optional[int] = None, seed: Optional[int] = None):
         self.grid_size = grid_size
-        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size * 2
+        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size * 4
         self._rng = random.Random(seed)
 
         self.snake: deque[tuple[int, int]] = deque()

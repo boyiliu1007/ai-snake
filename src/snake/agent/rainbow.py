@@ -59,10 +59,16 @@ class RainbowAgent:
     # Interaction
     # ------------------------------------------------------------------
 
-    def select_action(self, obs: np.ndarray, epsilon: float) -> int:
-        if np.random.random() < epsilon:
-            return int(np.random.randint(self.n_actions))
+    def select_action(self, obs: np.ndarray, evaluate: bool = False) -> int:
         state = torch.tensor(obs, dtype=torch.float32, device=self.device).unsqueeze(0)
+        
+        # 測試時 (evaluate=True) 關閉雜訊，平時訓練則重製雜訊並開啟
+        if evaluate:
+            self.online_net.eval()
+        else:
+            self.online_net.train()
+            self.online_net.reset_noise()
+
         with torch.no_grad():
             q = self.online_net(state)
         return int(q.argmax(dim=1).item())
@@ -88,7 +94,9 @@ class RainbowAgent:
         (states, actions, rewards, next_states, dones), indices, weights = (
             self.replay_buffer.sample(batch_size, beta)
         )
-
+        self.online_net.reset_noise()
+        self.target_net.reset_noise()
+        
         states      = torch.tensor(states,      dtype=torch.float32, device=self.device)
         actions     = torch.tensor(actions,     dtype=torch.int64,   device=self.device)
         rewards     = torch.tensor(rewards,     dtype=torch.float32, device=self.device)

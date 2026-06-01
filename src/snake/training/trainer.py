@@ -63,18 +63,18 @@ class Trainer:
         step = 0
         try:
             while global_step < cfg.total_steps:
-                epsilon = cfg.epsilon(global_step)
-                
-                # 1. 批次推論
-                rand_actions = np.random.randint(0, self.agent.n_actions, size=num_envs)
-                explore_mask = np.random.rand(num_envs) < epsilon
-                
+                current_lr = cfg.learning_rate(global_step)
+                for param_group in self.agent.optimizer.param_groups:
+                    param_group["lr"] = current_lr
+
                 state_batch = torch.tensor(obs, dtype=torch.float32, device=self.agent.device)
+                
+                self.agent.online_net.train()        # 開啟訓練(雜訊)模式
+                self.agent.online_net.reset_noise()  # 為這一步重置雜訊
+                
                 with torch.no_grad():
                     q_values = self.agent.online_net(state_batch)
-                    greedy_actions = q_values.argmax(dim=1).cpu().numpy()
-                
-                actions = np.where(explore_mask, rand_actions, greedy_actions)
+                    actions = q_values.argmax(dim=1).cpu().numpy()
                 
                 # 2. 16 個環境同時執行
                 next_obs, rewards, terminateds, truncateds, infos = self.env.step(actions)
@@ -121,7 +121,6 @@ class Trainer:
                         self.writer.add_scalar("episode/reward", episode_rewards[i], global_step)
                         self.writer.add_scalar("episode/length", final_info["snake_length"], global_step)
                         self.writer.add_scalar("episode/score", final_info["score"], global_step)
-                        self.writer.add_scalar("train/epsilon", epsilon, global_step)
 
                         best_score = max(best_score, final_info["score"])
                         episode_count += 1
@@ -155,12 +154,15 @@ class Trainer:
                 if steps_since_log >= cfg.log_freq and loss_steps > 0:
                     avg_loss = loss_accum / loss_steps
                     sps = steps_since_log / (time.time() - t0)
+                    
                     self.writer.add_scalar("train/loss", avg_loss, global_step)
                     self.writer.add_scalar("train/steps_per_sec", sps, global_step)
                     self.writer.add_scalar("train/buffer_size", len(self.agent.replay_buffer), global_step)
+                    self.writer.add_scalar("train/lr", current_lr, global_step) # 🌟 補上這行：畫到 TensorBoard
+                    
                     print(
                         f"step {global_step:>8,} | ep {episode_count:>5} | "
-                        f"loss {avg_loss:.4f} | ε {epsilon:.3f} | "
+                        f"loss {avg_loss:.4f} | lr {current_lr:.2e} | "         # 🌟 補上這行：印在終端機上
                         f"best_score {best_score} | {sps:.0f} sps"
                     )
                     loss_accum = 0.0

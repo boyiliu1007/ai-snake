@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--checkpoint", type=str, required=True)
     p.add_argument("--episodes",   type=int, default=10)
-    p.add_argument("--fps",        type=int, default=8)
+    p.add_argument("--fps",        type=int, default=30)
     p.add_argument("--grid",       type=int, default=12)
     return p.parse_args()
 
@@ -45,7 +45,7 @@ def main() -> None:
         ep_reward = 0.0
 
         while not done:
-            action = agent.select_action(obs, epsilon=0.0)
+            action = agent.select_action(obs, evaluate=True)
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             ep_reward += reward
