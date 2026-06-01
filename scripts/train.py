@@ -19,7 +19,6 @@ def parse_args() -> argparse.Namespace:
     default_cfg = RainbowConfig()
     
     p = argparse.ArgumentParser()
-    # 2. 將所有的 default 改為對應的 default_cfg 屬性
     p.add_argument("--steps",     type=int,   default=default_cfg.total_steps)
     p.add_argument("--run-dir",   type=str,   default=default_cfg.run_dir)
     p.add_argument("--lr",        type=float, default=default_cfg.lr)
@@ -32,7 +31,6 @@ def parse_args() -> argparse.Namespace:
                    help="Number of parallel environments to run")
     return p.parse_args()
 
-# 建立獨立環境的工廠函數
 def make_env(grid_size, max_steps_no_food):
     def _init():
         return SnakeEnv(grid_size=grid_size, max_steps_no_food=max_steps_no_food, render_mode=None)
@@ -50,16 +48,14 @@ def main() -> None:
         buffer_capacity=args.buffer,
     )
 
-    print(f"啟動 {args.num_envs} 個平行遊戲環境中...")
-    
-    # 這裡就是關鍵：把單一環境變成 16 個平行進程
+    print(f"Starting {args.num_envs} parallel environments...")
     envs = gym.vector.AsyncVectorEnv([
         make_env(cfg.grid_size, cfg.max_steps_no_food) for _ in range(args.num_envs)
     ])
 
     agent = RainbowAgent(
         in_channels=N_CHANNELS,
-        n_actions=4, 
+        n_actions=4,
         grid_size=cfg.grid_size,
         buffer_capacity=cfg.buffer_capacity,
         per_alpha=cfg.per_alpha,

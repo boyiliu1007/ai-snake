@@ -69,12 +69,12 @@ class Trainer:
 
                 state_batch = torch.tensor(obs, dtype=torch.float32, device=self.agent.device)
                 
-                self.agent.online_net.train()        # 開啟訓練(雜訊)模式
-                self.agent.online_net.reset_noise()  # 為這一步重置雜訊
-                
+                self.agent.online_net.train()
+                self.agent.online_net.reset_noise()
+
                 with torch.no_grad():
                     q_values = self.agent.online_net(state_batch)
-                    actions = q_values.argmax(dim=1).cpu().numpy()
+                    actions  = q_values.argmax(dim=1).cpu().numpy()
                 
                 # 2. 16 個環境同時執行
                 next_obs, rewards, terminateds, truncateds, infos = self.env.step(actions)
@@ -147,8 +147,7 @@ class Trainer:
                         loss_steps += 1
 
                 # ---- 維護與記錄 ----
-                if global_step % cfg.target_update_freq < num_envs:
-                    self.agent.update_target()
+                self.agent.update_target()
 
                 # 當累積的步數超過 log 頻率時進行記錄
                 if steps_since_log >= cfg.log_freq and loss_steps > 0:

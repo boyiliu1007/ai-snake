@@ -10,10 +10,7 @@ from snake.agent.replay_buffer import NStepBuffer, PrioritizedReplayBuffer
 
 
 class RainbowAgent:
-    """
-    Phase-1 Rainbow DQN: Double DQN + Dueling Network + PER + N-step returns.
-    (C51 / Noisy Nets deferred to Phase 2.)
-    """
+    """Rainbow DQN: Double DQN + Dueling + PER + N-step + NoisyNet."""
 
     def __init__(
         self,
@@ -34,6 +31,7 @@ class RainbowAgent:
         self.n_actions = n_actions
         self.gamma = gamma
         self.n_step = n_step
+
         if device:
             self.device = torch.device(device)
         elif torch.cuda.is_available():
@@ -62,7 +60,7 @@ class RainbowAgent:
     def select_action(self, obs: np.ndarray, evaluate: bool = False) -> int:
         state = torch.tensor(obs, dtype=torch.float32, device=self.device).unsqueeze(0)
         
-        # 測試時 (evaluate=True) 關閉雜訊，平時訓練則重製雜訊並開啟
+        # Eval mode: disable noise and use mean weights; train mode: resample noise
         if evaluate:
             self.online_net.eval()
         else:
@@ -96,7 +94,7 @@ class RainbowAgent:
         )
         self.online_net.reset_noise()
         self.target_net.reset_noise()
-        
+
         states      = torch.tensor(states,      dtype=torch.float32, device=self.device)
         actions     = torch.tensor(actions,     dtype=torch.int64,   device=self.device)
         rewards     = torch.tensor(rewards,     dtype=torch.float32, device=self.device)
@@ -104,12 +102,11 @@ class RainbowAgent:
         dones       = torch.tensor(dones,       dtype=torch.float32, device=self.device)
         weights     = torch.tensor(weights,     dtype=torch.float32, device=self.device)
 
-        # Double DQN target
+        # Double DQN target: online net selects action, target net evaluates it
         with torch.no_grad():
-            # online net selects action, target net evaluates it
             next_actions = self.online_net(next_states).argmax(dim=1, keepdim=True)
-            next_q = self.target_net(next_states).gather(1, next_actions).squeeze(1)
-            targets = rewards + self._gamma_n * (1.0 - dones) * next_q
+            next_q       = self.target_net(next_states).gather(1, next_actions).squeeze(1)
+            targets      = rewards + self._gamma_n * (1.0 - dones) * next_q
 
         current_q = self.online_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
 
@@ -124,8 +121,9 @@ class RainbowAgent:
         self.replay_buffer.update_priorities(indices, td_errors.abs().detach().cpu().numpy())
         return float(loss.item())
 
-    def update_target(self) -> None:
-        self.target_net.load_state_dict(self.online_net.state_dict())
+    def update_target(self, tau: float = 0.005) -> None:
+        for online_p, target_p in zip(self.online_net.parameters(), self.target_net.parameters()):
+            target_p.data.copy_(tau * online_p.data + (1.0 - tau) * target_p.data)
 
     # ------------------------------------------------------------------
     # Persistence

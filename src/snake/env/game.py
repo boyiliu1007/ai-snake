@@ -66,8 +66,9 @@ class SnakeGame:
         self.steps += 1
         self.steps_since_meal += 1
 
-        # Truncation — too many steps without food means the snake is circling
-        if self.steps_since_meal >= self.max_steps_no_food:
+        # Truncation — limit scales with snake length so longer snakes get more time to navigate
+        effective_limit = self.max_steps_no_food + len(self.snake) * 2
+        if self.steps_since_meal >= effective_limit:
             self._done = True
             return self._terminal_penalty(TRUNC_LAMBDA, TRUNC_MIN), False, True, self._info()
 
@@ -123,9 +124,11 @@ class SnakeGame:
 
     def _step_reward(self, ate_food: bool, old_head: tuple[int, int]) -> float:
         if ate_food:
-            return 1.0 + 0.05 * len(self.snake) 
+            return 1.0 + 0.05 * len(self.snake)
 
-        return -0.01  
+        old_dist = abs(old_head[0] - self.food[0]) + abs(old_head[1] - self.food[1])
+        new_dist = abs(self.snake[0][0] - self.food[0]) + abs(self.snake[0][1] - self.food[1])
+        return 0.01 * (old_dist - new_dist)
 
     def _info(self) -> dict:
         return {

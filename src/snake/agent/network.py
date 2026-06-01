@@ -5,9 +5,7 @@ import torch.nn.functional as F
 
 
 class _CNN(nn.Module):
-    """
-    維持我們上次修改的精簡版 CNN (stride=2 降維)
-    """
+    """Lightweight CNN feature extractor with stride-2 downsampling."""
     def __init__(self, in_channels: int, grid_size: int):
         super().__init__()
         self.net = nn.Sequential(
@@ -37,7 +35,7 @@ class NoisyLinear(nn.Module):
         self.out_features = out_features
         self.std_init = std_init
 
-        # 可學習的參數：均值 (mu) 與 標準差 (sigma)
+        # Learnable parameters: mean (mu) and standard deviation (sigma)
         self.weight_mu = nn.Parameter(torch.empty(out_features, in_features))
         self.weight_sigma = nn.Parameter(torch.empty(out_features, in_features))
         self.register_buffer("weight_epsilon", torch.empty(out_features, in_features))
@@ -61,14 +59,14 @@ class NoisyLinear(nn.Module):
         return x.sign().mul_(x.abs().sqrt_())
 
     def reset_noise(self) -> None:
-        # 重製雜訊 (每次環境 step 或計算 loss 前都要呼叫)
+        # Resample noise (call before each env step or loss computation)
         epsilon_in = self._scale_noise(self.in_features)
         epsilon_out = self._scale_noise(self.out_features)
         self.weight_epsilon.copy_(epsilon_out.outer(epsilon_in))
         self.bias_epsilon.copy_(epsilon_out)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # 訓練模式(互動與學習)使用雜訊，測試模式(evaluator)只使用均值(mu)
+        # Training mode uses noisy weights; eval mode uses mean (mu) only
         if self.training:
             weight = self.weight_mu + self.weight_sigma * self.weight_epsilon
             bias = self.bias_mu + self.bias_sigma * self.bias_epsilon
@@ -79,15 +77,14 @@ class NoisyLinear(nn.Module):
 
 
 class RainbowNet(nn.Module):
-    """
-    CNN feature extractor + Dueling head using NoisyLinear.
-    """
+    """CNN + Dueling NoisyLinear heads. Returns scalar Q-values of shape (B, n_actions)."""
+
     def __init__(self, in_channels: int, n_actions: int, grid_size: int):
         super().__init__()
         self.cnn = _CNN(in_channels, grid_size)
         feat = self.cnn.out_dim
 
-        # 🔧 將最後兩層全部換成 NoisyLinear
+        # Dueling streams built entirely from NoisyLinear layers
         self.value_stream = nn.Sequential(
             NoisyLinear(feat, 256),
             nn.ReLU(),
@@ -101,7 +98,7 @@ class RainbowNet(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         features = self.cnn(x)
-        value = self.value_stream(features)
+        value     = self.value_stream(features)
         advantage = self.advantage_stream(features)
         return value + advantage - advantage.mean(dim=1, keepdim=True)
 

@@ -41,7 +41,7 @@ class RainbowConfig:
     eval_freq: int = 25_000          # run evaluator every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/change_learning_rate"
+    run_dir: str = "runs/full_rainbow"
 
     def epsilon(self, step: int) -> float:
         frac = min(step / self.epsilon_decay_steps, 1.0)
@@ -52,15 +52,11 @@ class RainbowConfig:
         return self.per_beta_start + frac * (self.per_beta_end - self.per_beta_start)
 
     def learning_rate(self, step: int) -> float:
-        # 前 1,000,000 步保持初始學習率，之後開始線性衰減
         decay_start = 1_000_000
         if step <= decay_start:
             return self.lr
-        
-        # 避免除以零的安全防護
         decay_duration = max(1, self.total_steps - decay_start)
         frac = min((step - decay_start) / decay_duration, 1.0)
-        
         return self.lr + frac * (self.lr_end - self.lr)
     
     @property
