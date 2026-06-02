@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--buffer",    type=int,   default=default_cfg.buffer_capacity)
     p.add_argument("--resume",    type=str,   default=None,
                    help="Path to checkpoint .pt to resume from")
-    p.add_argument("--num-envs",  type=int,   default=16,
+    p.add_argument("--num-envs",  type=int,   default=32,
                    help="Number of parallel environments to run")
     return p.parse_args()
 
