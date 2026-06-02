@@ -126,10 +126,12 @@ class SnakeGame:
         if ate_food:
             return 1.0 + 0.05 * len(self.snake)
 
-        old_dist = abs(old_head[0] - self.food[0]) + abs(old_head[1] - self.food[1])
-        new_dist = abs(self.snake[0][0] - self.food[0]) + abs(self.snake[0][1] - self.food[1])
-        return 0.01 * (old_dist - new_dist)
+        # old_dist = abs(old_head[0] - self.food[0]) + abs(old_head[1] - self.food[1])
+        # new_dist = abs(self.snake[0][0] - self.food[0]) + abs(self.snake[0][1] - self.food[1])
+        # return 0.01 * (old_dist - new_dist)
 
+        return -0.01 # discourage unnecessary moves at the start of the game
+    
     def _info(self) -> dict:
         return {
             "snake_length": len(self.snake),

@@ -41,7 +41,7 @@ class RainbowConfig:
     eval_freq: int = 25_000          # run evaluator every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/full_rainbow"
+    run_dir: str = "runs/change_step_reward"
 
     def epsilon(self, step: int) -> float:
         frac = min(step / self.epsilon_decay_steps, 1.0)
