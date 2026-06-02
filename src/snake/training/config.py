@@ -19,7 +19,7 @@ class RainbowConfig:
     lr_end: float = 1e-5
     # ---- RL ----
     gamma: float = 0.99
-    n_step: int = 3
+    n_step: int = 5
 
     # ---- PER ----
     buffer_capacity: int = 500_000
