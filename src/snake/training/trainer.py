@@ -73,7 +73,9 @@ class Trainer:
                 self.agent.online_net.reset_noise()
 
                 with torch.no_grad():
-                    q_values = self.agent.online_net(state_batch)
+                    log_p = self.agent.online_net(state_batch)
+                    p = log_p.exp()
+                    q_values = (p * self.agent.support).sum(dim=2)
                     actions  = q_values.argmax(dim=1).cpu().numpy()
                 
                 # 2. 16 個環境同時執行

@@ -34,6 +34,9 @@ def main() -> None:
         in_channels=N_CHANNELS,
         n_actions=int(env.action_space.n),
         grid_size=args.grid,
+        v_min=-2,
+        v_max=15,
+        n_atoms=51,
     )
     agent.load(args.checkpoint)
     print(f"Loaded {args.checkpoint}  |  device: {agent.device}")

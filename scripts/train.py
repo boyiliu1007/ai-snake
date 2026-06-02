@@ -62,6 +62,9 @@ def main() -> None:
         n_step=cfg.n_step,
         gamma=cfg.gamma,
         lr=cfg.lr,
+        v_min=-2,      
+        v_max=15,      
+        n_atoms=51,
     )
 
     if args.resume:

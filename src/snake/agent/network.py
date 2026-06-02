@@ -77,30 +77,46 @@ class NoisyLinear(nn.Module):
 
 
 class RainbowNet(nn.Module):
-    """CNN + Dueling NoisyLinear heads. Returns scalar Q-values of shape (B, n_actions)."""
+    """CNN + Dueling NoisyLinear heads + C51 Distributional Output."""
 
-    def __init__(self, in_channels: int, n_actions: int, grid_size: int):
+    # 🔧 新增 n_atoms 參數
+    def __init__(self, in_channels: int, n_actions: int, grid_size: int, n_atoms: int = 51):
         super().__init__()
+        self.n_actions = n_actions
+        self.n_atoms = n_atoms
+        
         self.cnn = _CNN(in_channels, grid_size)
         feat = self.cnn.out_dim
 
-        # Dueling streams built entirely from NoisyLinear layers
+        # 🔧 Value stream 現在輸出 n_atoms 個特徵
         self.value_stream = nn.Sequential(
             NoisyLinear(feat, 256),
             nn.ReLU(),
-            NoisyLinear(256, 1),
+            NoisyLinear(256, n_atoms),
         )
+        
+        # 🔧 Advantage stream 輸出 n_actions * n_atoms 個特徵
         self.advantage_stream = nn.Sequential(
             NoisyLinear(feat, 256),
             nn.ReLU(),
-            NoisyLinear(256, n_actions),
+            NoisyLinear(256, n_actions * n_atoms),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        batch_size = x.size(0)
         features = self.cnn(x)
-        value     = self.value_stream(features)
-        advantage = self.advantage_stream(features)
-        return value + advantage - advantage.mean(dim=1, keepdim=True)
+        
+        # 形狀轉換：(Batch, n_atoms) -> (Batch, 1, n_atoms)
+        value = self.value_stream(features).view(batch_size, 1, self.n_atoms)
+        
+        # 形狀轉換：(Batch, n_actions * n_atoms) -> (Batch, n_actions, n_atoms)
+        advantage = self.advantage_stream(features).view(batch_size, self.n_actions, self.n_atoms)
+        
+        # Dueling 結合：(Batch, n_actions, n_atoms)
+        q_atoms = value + advantage - advantage.mean(dim=1, keepdim=True)
+        
+        # 🔧 透過 log_softmax 將 51 個輸出轉為機率分佈 (Log Probabilities)
+        return F.log_softmax(q_atoms, dim=2)
 
     def reset_noise(self) -> None:
         """Resets noise for all NoisyLinear layers."""

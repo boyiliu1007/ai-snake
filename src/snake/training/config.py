@@ -20,6 +20,9 @@ class RainbowConfig:
     # ---- RL ----
     gamma: float = 0.99
     n_step: int = 5
+    v_min: float = -2.0      # 預期的最低 Q-value (死亡懲罰是 -1.0，所以設 -2.0 很安全)
+    v_max: float = 15.0      # 預期的最高 Q-value (考慮到 gamma 折扣，15.0 足以涵蓋後期分數)
+    n_atoms: int = 51        # 將分數區間切成 51 個柱狀圖
 
     # ---- PER ----
     buffer_capacity: int = 500_000
@@ -41,7 +44,7 @@ class RainbowConfig:
     eval_freq: int = 25_000          # run evaluator every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/change_step_reward"
+    run_dir: str = "runs/C51_Rainbow"
 
     def epsilon(self, step: int) -> float:
         frac = min(step / self.epsilon_decay_steps, 1.0)
