@@ -9,11 +9,22 @@ if TYPE_CHECKING:
 
 
 class Evaluator:
-    def __init__(self, agent: "RainbowAgent", grid_size: int, n_episodes: int = 10):
+    def __init__(
+        self,
+        agent: "RainbowAgent",
+        grid_size: int,
+        n_episodes: int = 10,
+        max_steps_no_food: int = None,
+    ):
         self.agent = agent
         self.n_episodes = n_episodes
-        # Separate env with no rendering so eval doesn't affect training display
-        self._env = SnakeEnv(grid_size=grid_size, render_mode=None)
+        # Separate env with no rendering so eval doesn't affect training display.
+        # Match the training truncation limit so eval numbers are comparable.
+        self._env = SnakeEnv(
+            grid_size=grid_size,
+            max_steps_no_food=max_steps_no_food,
+            render_mode=None,
+        )
 
     def evaluate(self) -> dict:
         lengths, scores, rewards = [], [], []
@@ -24,7 +35,7 @@ class Evaluator:
             ep_reward = 0.0
 
             while not done:
-                action = self.agent.select_action(obs, epsilon=0.0)
+                action = self.agent.select_action(obs, evaluate=True)
                 obs, reward, terminated, truncated, info = self._env.step(action)
                 done = terminated or truncated
                 ep_reward += reward

@@ -3,9 +3,9 @@ from typing import Optional
 import random
 
 GRID_SIZE = 12
-DEATH_LAMBDA = 10.0   # peak death penalty  (grid empty, length=3 → ~-9.8)
+DEATH_LAMBDA = 1   # peak death penalty  (grid empty, length=3 → ~-9.8)
 DEATH_MIN    = 1.0    # floor death penalty (grid full  → -1.0)
-TRUNC_LAMBDA = 1.0    # peak truncation penalty
+TRUNC_LAMBDA = 1   # peak truncation penalty
 TRUNC_MIN    = 0.1    # floor truncation penalty
 
 UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
@@ -21,7 +21,7 @@ class SnakeGame:
 
     def __init__(self, grid_size: int = GRID_SIZE, max_steps_no_food: Optional[int] = None, seed: Optional[int] = None):
         self.grid_size = grid_size
-        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size
+        self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size * 4
         self._rng = random.Random(seed)
 
         self.snake: deque[tuple[int, int]] = deque()
@@ -59,14 +59,16 @@ class SnakeGame:
         self.direction = action
 
         dr, dc = _DELTA[action]
-        hr, hc = self.snake[0]
+        old_head = self.snake[0]
+        hr, hc = old_head
         new_head = (hr + dr, hc + dc)
 
         self.steps += 1
         self.steps_since_meal += 1
 
-        # Truncation — too many steps without food means the snake is circling
-        if self.steps_since_meal >= self.max_steps_no_food:
+        # Truncation — limit scales with snake length so longer snakes get more time to navigate
+        effective_limit = self.max_steps_no_food + len(self.snake) * 2
+        if self.steps_since_meal >= effective_limit:
             self._done = True
             return self._terminal_penalty(TRUNC_LAMBDA, TRUNC_MIN), False, True, self._info()
 
@@ -90,7 +92,7 @@ class SnakeGame:
         else:
             self.snake.pop()
 
-        reward = self._step_reward(ate_food)
+        reward = self._step_reward(ate_food, old_head)
         return reward, False, False, self._info()
 
     @property
@@ -118,23 +120,19 @@ class SnakeGame:
         Near-empty grid → penalty ≈ -lam  (dying/circling is avoidable → punish hard).
         Near-full grid  → penalty = -floor (barely any room left → punish lightly).
         """
-        grid_cells = self.grid_size * self.grid_size
-        free_ratio = (grid_cells - len(self.snake)) / grid_cells
-        return -max(floor, lam * free_ratio)
+        return -lam
 
-    def _step_reward(self, ate_food: bool) -> float:
-        length = len(self.snake)
-        head = self.snake[0]
-        dist = abs(head[0] - self.food[0]) + abs(head[1] - self.food[1])
-
+    def _step_reward(self, ate_food: bool, old_head: tuple[int, int]) -> float:
         if ate_food:
-            return min(0.5 * length, 10.0)
+            # return 1.0 + 0.05 * len(self.snake)
+            return 1.0
 
-        return (
-            -0.05 * (dist / length)
-            - 0.1 * (self.steps_since_meal / length)
-        )
+        # old_dist = abs(old_head[0] - self.food[0]) + abs(old_head[1] - self.food[1])
+        # new_dist = abs(self.snake[0][0] - self.food[0]) + abs(self.snake[0][1] - self.food[1])
+        # return 0.01 * (old_dist - new_dist)
 
+        return -0.01 # discourage unnecessary moves at the start of the game
+    
     def _info(self) -> dict:
         return {
             "snake_length": len(self.snake),

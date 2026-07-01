@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--checkpoint", type=str, required=True)
     p.add_argument("--episodes",   type=int, default=10)
-    p.add_argument("--fps",        type=int, default=8)
+    p.add_argument("--fps",        type=int, default=30)
     p.add_argument("--grid",       type=int, default=12)
     return p.parse_args()
 
@@ -34,6 +34,9 @@ def main() -> None:
         in_channels=N_CHANNELS,
         n_actions=int(env.action_space.n),
         grid_size=args.grid,
+        v_min=-2,
+        v_max=15,
+        n_atoms=51,
     )
     agent.load(args.checkpoint)
     print(f"Loaded {args.checkpoint}  |  device: {agent.device}")
@@ -45,7 +48,7 @@ def main() -> None:
         ep_reward = 0.0
 
         while not done:
-            action = agent.select_action(obs, epsilon=0.0)
+            action = agent.select_action(obs, evaluate=True)
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             ep_reward += reward

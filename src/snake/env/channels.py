@@ -21,7 +21,7 @@ def _body_gradient(snake: deque, grid_size: int) -> np.ndarray:
     ch = np.zeros((grid_size, grid_size), dtype=np.float32)
     n = len(snake)
     for i, (r, c) in enumerate(snake):
-        ch[r, c] = (n - i) / n  # head gets 1.0, tail gets 1/n
+        ch[r, c] = 0.15 + 0.85 * (n - i) / n  # head=1.0, tail≥0.15 regardless of length
     return ch
 
 

@@ -129,6 +129,7 @@ class PrioritizedReplayBuffer:
         self.alpha = alpha
         self._tree = _SumTree(capacity)
         self._max_priority: float = 1.0
+        self._rng = np.random.default_rng()
 
     # ---- write ----
 
@@ -140,7 +141,7 @@ class PrioritizedReplayBuffer:
         next_state: np.ndarray,
         done: bool,
     ) -> None:
-        priority = self._max_priority ** self.alpha
+        priority = self._max_priority 
         self._tree.add(priority, (state, action, reward, next_state, done))
 
     # ---- read ----
@@ -155,10 +156,9 @@ class PrioritizedReplayBuffer:
         segment = self._tree.total / batch_size
         indices, priorities, raw = [], [], []
 
-        rng = np.random.default_rng()
         for i in range(batch_size):
             lo, hi = segment * i, segment * (i + 1)
-            s = rng.uniform(lo, hi)
+            s = self._rng.uniform(lo, hi)
             idx, priority, data = self._tree.get(s)
             indices.append(idx)
             priorities.append(priority)
