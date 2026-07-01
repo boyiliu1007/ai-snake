@@ -9,7 +9,7 @@ class RainbowConfig:
     max_steps_no_food: int = 144        # grid_size² — truncates circling episodes
 
     # ---- Training schedule ----
-    total_steps: int = 3_000_000
+    total_steps: int = 4_000_000
     warmup_steps: int = 10_000        # steps before first gradient update
     batch_size: int = 128
     train_freq: int = 1              # gradient steps per env step

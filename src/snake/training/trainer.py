@@ -19,7 +19,9 @@ class Trainer:
 
         config.run_path.mkdir(parents=True, exist_ok=True)
         self.writer = SummaryWriter(log_dir=str(config.run_path / "tb"))
-        self.evaluator = Evaluator(agent, config.grid_size, config.eval_episodes)
+        self.evaluator = Evaluator(
+            agent, config.grid_size, config.eval_episodes, config.max_steps_no_food
+        )
 
     def train(self) -> None:
         cfg = self.cfg
@@ -59,8 +61,7 @@ class Trainer:
         print(f"Warming up for {cfg.warmup_steps:,} steps…")
 
         global_step = 0
-        steps_since_log = 0  # 👈 新增：用來精準計算 sps 的計數器
-        step = 0
+        steps_since_log = 0  # counter for accurate sps calculation
         try:
             while global_step < cfg.total_steps:
                 current_lr = cfg.learning_rate(global_step)
@@ -192,14 +193,14 @@ class Trainer:
             print(f"\nInterrupted at step {global_step:,}. Saving…")
 
         finally:
-            # 如果目前步數等於或超過總步數，代表是正常跑完
-            if step >= cfg.total_steps:
+            # Reaching the total step count means the run finished normally
+            if global_step >= cfg.total_steps:
                 final_path = cfg.run_path / "final.pt"
                 self.agent.save(final_path)
                 print(f"Training Complete! Saved → {final_path}")
             else:
-                # 否則才是中途被中斷
-                interrupt_path = cfg.run_path / f"interrupted_{step:08d}.pt"
+                # Otherwise the run was interrupted partway through
+                interrupt_path = cfg.run_path / f"interrupted_{global_step:08d}.pt"
                 self.agent.save(interrupt_path)
                 print(f"Saved → {interrupt_path}")
                 

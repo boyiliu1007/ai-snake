@@ -55,7 +55,8 @@ class NoisyLinear(nn.Module):
         self.bias_sigma.data.fill_(self.std_init / math.sqrt(self.out_features))
 
     def _scale_noise(self, size: int) -> torch.Tensor:
-        x = torch.randn(size)
+        # Generate on the same device as the buffers to avoid CPU→GPU copies each step
+        x = torch.randn(size, device=self.weight_epsilon.device)
         return x.sign().mul_(x.abs().sqrt_())
 
     def reset_noise(self) -> None:

@@ -5,7 +5,7 @@ import gymnasium as gym
 from gymnasium import spaces
 
 from snake.env.game import SnakeGame, GRID_SIZE
-from snake.env.channels import build_channels, N_CHANNELS
+from snake.env.channels import build_channels, N_CHANNELS, _head_channel, _body_gradient
 
 
 class SnakeEnv(gym.Env):
@@ -65,16 +65,24 @@ class SnakeEnv(gym.Env):
         return obs, self._game._info()
 
     def step(self, action: int) -> tuple[np.ndarray, float, bool, bool, dict]:
-        # Snapshot current channels for t-1 slots before advancing
-        current_obs = self._get_obs()
-        self._prev_head_ch = current_obs[0].copy()
-        self._prev_body_grad_ch = current_obs[1].copy()
+        # Snapshot current head/body channels for the t-1 slots before advancing.
+        # Only these two channels are needed here, so skip the expensive flood-fill BFS.
+        self._prev_head_ch = _head_channel(self._game.snake, self.grid_size)
+        self._prev_body_grad_ch = _body_gradient(self._game.snake, self.grid_size)
 
         reward, terminated, truncated, info = self._game.step(int(action))
-        self._last_reward = reward
-        self._episode_reward += reward
 
         obs = self._get_obs()
+        # Bonus for keeping reachable area open — encourages coiling over space-wasting paths.
+        # Only on non-terminal steps so it doesn't interfere with death/truncation penalties.
+        if not terminated and not truncated:
+            free_cells = self.grid_size * self.grid_size - len(self._game.snake)
+            if free_cells > 0:
+                reachable_fraction = obs[4].sum() / free_cells
+                reward += 0.005 * reachable_fraction
+
+        self._last_reward = reward
+        self._episode_reward += reward
         info["episode_reward"] = self._episode_reward
 
         if self.render_mode == "human":
