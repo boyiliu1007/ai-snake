@@ -4,8 +4,14 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
-from snake.env.game import SnakeGame, GRID_SIZE
-from snake.env.channels import build_channels, N_CHANNELS, _head_channel, _body_gradient
+from snake.env.game import SnakeGame, GRID_SIZE, LEFT_TURN, RIGHT_TURN
+from snake.env.channels import (
+    build_channels,
+    to_egocentric,
+    obs_shape_config,
+    _head_channel,
+    _body_gradient,
+)
 
 
 class SnakeEnv(gym.Env):
@@ -22,18 +28,25 @@ class SnakeEnv(gym.Env):
         grid_size: int = GRID_SIZE,
         max_steps_no_food: Optional[int] = None,
         render_mode: Optional[str] = None,
+        egocentric: bool = False,
     ):
         super().__init__()
         self.grid_size = grid_size
         self.render_mode = render_mode
+        self.egocentric = egocentric
+
+        # Egocentric mode drops the two t-1 channels and adds 3 danger-flag planes.
+        self.n_spatial, self.n_flags = obs_shape_config(egocentric)
 
         self.observation_space = spaces.Box(
             low=0.0,
             high=1.0,
-            shape=(N_CHANNELS, grid_size, grid_size),
+            shape=(self.n_spatial + self.n_flags, grid_size, grid_size),
             dtype=np.float32,
         )
-        self.action_space = spaces.Discrete(4)
+        # Egocentric mode uses 3 heading-relative actions (turn left / straight /
+        # turn right); absolute mode uses 4 fixed directions.
+        self.action_space = spaces.Discrete(3 if egocentric else 4)
 
         self._game = SnakeGame(grid_size=grid_size, max_steps_no_food=max_steps_no_food)
         self._prev_head_ch: Optional[np.ndarray] = None
@@ -66,9 +79,13 @@ class SnakeEnv(gym.Env):
 
     def step(self, action: int) -> tuple[np.ndarray, float, bool, bool, dict]:
         # Snapshot current head/body channels for the t-1 slots before advancing.
-        # Only these two channels are needed here, so skip the expensive flood-fill BFS.
-        self._prev_head_ch = _head_channel(self._game.snake, self.grid_size)
-        self._prev_body_grad_ch = _body_gradient(self._game.snake, self.grid_size)
+        # Egocentric mode drops those channels, so the snapshot isn't needed there.
+        if not self.egocentric:
+            self._prev_head_ch = _head_channel(self._game.snake, self.grid_size)
+            self._prev_body_grad_ch = _body_gradient(self._game.snake, self.grid_size)
+        else:
+            # In egocentric mode the action is heading-relative; convert to absolute.
+            action = self._relative_to_absolute(int(action))
 
         reward, terminated, truncated, info = self._game.step(int(action))
 
@@ -113,11 +130,30 @@ class SnakeEnv(gym.Env):
     # Internal
     # ------------------------------------------------------------------
 
+    def _relative_to_absolute(self, action: int) -> int:
+        """Map a heading-relative action (0=left, 1=straight, 2=right) to an absolute direction."""
+        d = self._game.direction
+        if action == 0:
+            return LEFT_TURN[d]
+        if action == 2:
+            return RIGHT_TURN[d]
+        return d  # straight
+
     def _get_obs(self) -> np.ndarray:
-        return build_channels(
+        obs = build_channels(
             snake=self._game.snake,
             food=self._game.food,
             grid_size=self.grid_size,
             prev_head_ch=self._prev_head_ch,
             prev_body_grad_ch=self._prev_body_grad_ch,
         )
+        if self.egocentric:
+            obs = obs[: self.n_spatial]                     # drop t-1 head/body (ch 5, 6)
+            obs = to_egocentric(obs, self._game.direction)
+            # Append constant danger-flag planes (left / straight / right).
+            flags = self._game.relative_safety()
+            planes = np.empty((self.n_flags, self.grid_size, self.grid_size), dtype=np.float32)
+            for i, f in enumerate(flags):
+                planes[i].fill(f)
+            obs = np.concatenate([obs, planes], axis=0)
+        return obs

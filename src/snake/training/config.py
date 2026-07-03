@@ -7,6 +7,7 @@ class RainbowConfig:
     # ---- Environment ----
     grid_size: int = 12
     max_steps_no_food: int = 144        # grid_size² — truncates circling episodes
+    egocentric: bool = False            # rotate obs to heading-up + 3 relative actions
 
     # ---- Training schedule ----
     total_steps: int = 4_000_000

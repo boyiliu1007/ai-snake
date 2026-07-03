@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from snake.agent.rainbow import RainbowAgent
-from snake.env.channels import N_CHANNELS
+from snake.env.channels import obs_shape_config
 from snake.env.snake_env import SnakeEnv
 
 
@@ -23,20 +23,24 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--episodes",   type=int, default=10)
     p.add_argument("--fps",        type=int, default=30)
     p.add_argument("--grid",       type=int, default=12)
+    p.add_argument("--egocentric", action="store_true",
+                   help="Must match how the checkpoint was trained")
     return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
-    env = SnakeEnv(grid_size=args.grid, render_mode="human")
+    env = SnakeEnv(grid_size=args.grid, render_mode="human", egocentric=args.egocentric)
+    in_channels, n_flags = obs_shape_config(args.egocentric)
     agent = RainbowAgent(
-        in_channels=N_CHANNELS,
+        in_channels=in_channels,
         n_actions=int(env.action_space.n),
         grid_size=args.grid,
         v_min=-2,
         v_max=15,
         n_atoms=51,
+        n_flags=n_flags,
     )
     agent.load(args.checkpoint)
     print(f"Loaded {args.checkpoint}  |  device: {agent.device}")

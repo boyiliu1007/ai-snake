@@ -20,7 +20,8 @@ class Trainer:
         config.run_path.mkdir(parents=True, exist_ok=True)
         self.writer = SummaryWriter(log_dir=str(config.run_path / "tb"))
         self.evaluator = Evaluator(
-            agent, config.grid_size, config.eval_episodes, config.max_steps_no_food
+            agent, config.grid_size, config.eval_episodes,
+            config.max_steps_no_food, config.egocentric,
         )
 
     def train(self) -> None:

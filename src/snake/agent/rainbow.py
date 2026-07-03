@@ -30,6 +30,7 @@ class RainbowAgent:
         v_min: float = -2.0,
         v_max: float = 15.0,
         n_atoms: int = 51,
+        n_flags: int = 0,
     ):
         self.n_actions = n_actions
         self.gamma = gamma
@@ -51,8 +52,8 @@ class RainbowAgent:
         # 建立固定的 51 個分數刻度 (Support)
         self.support = torch.linspace(v_min, v_max, n_atoms).to(self.device)
 
-        self.online_net = RainbowNet(in_channels, n_actions, grid_size).to(self.device)
-        self.target_net = RainbowNet(in_channels, n_actions, grid_size).to(self.device)
+        self.online_net = RainbowNet(in_channels, n_actions, grid_size, n_atoms, n_flags).to(self.device)
+        self.target_net = RainbowNet(in_channels, n_actions, grid_size, n_atoms, n_flags).to(self.device)
         self.target_net.load_state_dict(self.online_net.state_dict())
         self.target_net.eval()
 
