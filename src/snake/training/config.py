@@ -5,8 +5,8 @@ from pathlib import Path
 @dataclass
 class RainbowConfig:
     # ---- Environment ----
-    grid_size: int = 12
-    max_steps_no_food: int = 144        # grid_size² — truncates circling episodes
+    grid_size: int = 8
+    max_steps_no_food: int = 64        # grid_size² — truncates circling episodes
     egocentric: bool = False            # rotate obs to heading-up + 3 relative actions
 
     # ---- Training schedule ----
@@ -45,7 +45,7 @@ class RainbowConfig:
     eval_freq: int = 25_000          # run evaluator every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/C51_Rainbow"
+    run_dir: str = "runs/Rainbow-egocentric"
 
     def epsilon(self, step: int) -> float:
         frac = min(step / self.epsilon_decay_steps, 1.0)

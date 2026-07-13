@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--checkpoint", type=str, required=True)
     p.add_argument("--episodes",   type=int, default=10)
     p.add_argument("--fps",        type=int, default=30)
-    p.add_argument("--grid",       type=int, default=12)
+    p.add_argument("--grid",       type=int, default=8)
     p.add_argument("--egocentric", action="store_true",
                    help="Must match how the checkpoint was trained")
     return p.parse_args()

@@ -2,7 +2,7 @@ from collections import deque
 from typing import Optional
 import random
 
-GRID_SIZE = 12
+GRID_SIZE = 8
 DEATH_LAMBDA = 1   # peak death penalty  (grid empty, length=3 → ~-9.8)
 DEATH_MIN    = 1.0    # floor death penalty (grid full  → -1.0)
 TRUNC_LAMBDA = 1   # peak truncation penalty

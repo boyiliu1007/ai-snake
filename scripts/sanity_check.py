@@ -13,7 +13,7 @@ from snake.env.snake_env import SnakeEnv
 from snake.env.channels import N_CHANNELS
 
 RENDER = "--render" in sys.argv
-GRID = 12
+GRID = 8
 STEPS = 50
 
 
