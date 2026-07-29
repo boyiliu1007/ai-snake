@@ -9,14 +9,18 @@ class _CNN(nn.Module):
     def __init__(self, in_channels: int, grid_size: int):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, 32, kernel_size=3, padding_mode='replicate', padding=1, stride=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, padding_mode='replicate', padding=1, stride=2),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.Conv2d(64, 64, kernel_size=3, padding_mode='replicate', padding=1, stride=1),
             nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3, padding_mode='replicate', stride=1),
+            nn.ReLU(),
+
+            nn.AdaptiveMaxPool2d((3, 3)),
             nn.Flatten(),
-            nn.Linear(64 * (grid_size // 2) * (grid_size // 2), 256),
+            nn.Linear(128 * 3 * 3, 256),
             nn.ReLU(),
         )
         self.out_dim = 256
