@@ -27,7 +27,6 @@ class Trainer:
     def train(self) -> None:
         cfg = self.cfg
         
-        # 🎯 在这里添加
         print("\n" + "="*60)
         print("🚀 Training Configuration")
         print("="*60)
@@ -143,7 +142,7 @@ class Trainer:
                 if global_step >= cfg.warmup_steps and len(self.agent.replay_buffer) >= cfg.batch_size:
                     # 恢復標準的學習頻率：收集 16 步，就扎實地訓練 4 次
                     # 使用預設的 Batch Size (128)，確保死亡的教訓不會被過度稀釋
-                    train_times = 4 
+                    train_times = cfg.train_freq
                     
                     for _ in range(train_times):
                         loss = self.agent.train_step(cfg.batch_size, cfg.beta(global_step))

@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 import gymnasium as gym
 import torch
+torch.set_float32_matmul_precision('high') 
 torch.set_num_threads(1)
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
@@ -27,7 +28,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--buffer",    type=int,   default=default_cfg.buffer_capacity)
     p.add_argument("--resume",    type=str,   default=None,
                    help="Path to checkpoint .pt to resume from")
-    p.add_argument("--num-envs",  type=int,   default=32,
+    p.add_argument("--num-envs",  type=int,   default=128,
                    help="Number of parallel environments to run")
     p.add_argument("--egocentric", action="store_true", default=default_cfg.egocentric,
                    help="Rotate obs to heading-up and use 3 relative actions")
@@ -53,7 +54,7 @@ def main() -> None:
     )
 
     print(f"Starting {args.num_envs} parallel environments...")
-    envs = gym.vector.AsyncVectorEnv([
+    envs = gym.vector.SyncVectorEnv([
         make_env(cfg.grid_size, cfg.max_steps_no_food, cfg.egocentric) for _ in range(args.num_envs)
     ])
 

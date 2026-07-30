@@ -134,12 +134,13 @@ class SnakeGame:
             # return 1.0 + 0.05 * len(self.snake)
             return 1.0
 
-        # old_dist = abs(old_head[0] - self.food[0]) + abs(old_head[1] - self.food[1])
-        # new_dist = abs(self.snake[0][0] - self.food[0]) + abs(self.snake[0][1] - self.food[1])
-        # return 0.01 * (old_dist - new_dist)
+        # occupancy = len(self.snake) / (self.grid_size * self.grid_size)
 
-        return -0.01 # discourage unnecessary moves at the start of the game
-    
+        # penalty = min(-0.002, -0.01 * (1.0 - occupancy))
+
+        # return penalty # discourage unnecessary moves at the start of the game
+        return -0.01
+
     def relative_safety(self) -> tuple[float, float, float]:
         """
         Safety of each heading-relative move, ordered to match the egocentric

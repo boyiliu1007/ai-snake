@@ -54,6 +54,10 @@ class RainbowAgent:
 
         self.online_net = RainbowNet(in_channels, n_actions, grid_size, n_atoms, n_flags).to(self.device)
         self.target_net = RainbowNet(in_channels, n_actions, grid_size, n_atoms, n_flags).to(self.device)
+
+        self.online_net = torch.compile(self.online_net)
+        self.target_net = torch.compile(self.target_net)
+
         self.target_net.load_state_dict(self.online_net.state_dict())
         self.target_net.eval()
 
@@ -115,39 +119,42 @@ class RainbowAgent:
         dones       = torch.tensor(dones,       dtype=torch.float32, device=self.device)
         weights     = torch.tensor(weights,     dtype=torch.float32, device=self.device)
 
-        with torch.no_grad():
-            # 1. Online Net 負責選動作 (期望值最大的動作)
-            next_p = self.online_net(next_states).exp()
-            next_q = (next_p * self.support).sum(dim=2)
-            next_actions = next_q.argmax(dim=1)
-            
-            # 2. Target Net 給出該動作的機率分佈
-            next_target_p = self.target_net(next_states).exp()
-            next_target_p = next_target_p[range(batch_size), next_actions]
-            
-            # 3. 將支撐點 (Support) 依據 Reward 和 Gamma 進行平移
-            Tz = rewards.unsqueeze(1) + self._gamma_n * (1.0 - dones.unsqueeze(1)) * self.support.unsqueeze(0)
-            Tz = Tz.clamp(min=self.v_min, max=self.v_max)
-            
-            # 4. C51 投影演算法 (把平移後的機率，依比例分配給相鄰的兩個固定柱子)
-            b = (Tz - self.v_min) / self.delta_z
-            l = b.floor().long()
-            u = b.ceil().long()
-            
-            m = torch.zeros(batch_size, self.n_atoms, device=self.device)
-            offset = torch.linspace(0, (batch_size - 1) * self.n_atoms, batch_size, device=self.device).long().unsqueeze(1)
-            
-            # m 陣列收集投影後的真實機率 (Target Distribution)
-            m.view(-1).index_add_(0, (l + offset).view(-1), (next_target_p * (u.float() - b)).view(-1))
-            m.view(-1).index_add_(0, (u + offset).view(-1), (next_target_p * (b - l.float())).view(-1))
+        # 啟動 RTX 5070 的 Tensor Core bfloat16 自動混合精度加速
+        with torch.autocast(device_type="cuda", dtype=torch.bfloat16):
+            with torch.no_grad():
+                # 1. Online Net 負責選動作 (確保神經網路輸出後立即轉回 float32，避免 C51 精度遺失)
+                next_p = self.online_net(next_states).float().exp()
+                next_q = (next_p * self.support).sum(dim=2)
+                next_actions = next_q.argmax(dim=1)
+                
+                # 2. Target Net 給出該動作的機率分佈
+                next_target_p = self.target_net(next_states).float().exp()
+                next_target_p = next_target_p[range(batch_size), next_actions]
+                
+                # 3. 將支撐點 (Support) 依據 Reward 和 Gamma 進行平移
+                Tz = rewards.unsqueeze(1) + self._gamma_n * (1.0 - dones.unsqueeze(1)) * self.support.unsqueeze(0)
+                Tz = Tz.clamp(min=self.v_min, max=self.v_max)
+                
+                # 4. C51 投影演算法
+                b = (Tz - self.v_min) / self.delta_z
+                l = b.floor().long()
+                u = b.ceil().long()
+                
+                # 強制宣告 m 為 float32，防止 index_add_ 發生 dtype 衝突
+                m = torch.zeros(batch_size, self.n_atoms, device=self.device, dtype=torch.float32)
+                offset = torch.linspace(0, (batch_size - 1) * self.n_atoms, batch_size, device=self.device).long().unsqueeze(1)
+                
+                # m 陣列收集投影後的真實機率 (Target Distribution)
+                m.view(-1).index_add_(0, (l + offset).view(-1), (next_target_p * (u.float() - b)).view(-1))
+                m.view(-1).index_add_(0, (u + offset).view(-1), (next_target_p * (b - l.float())).view(-1))
 
-        # 5. 取得當前狀態下，實際執行動作的預測 Log 機率
-        log_p = self.online_net(states)
-        log_p_a = log_p[range(batch_size), actions]
-        
-        # 6. 計算 Cross Entropy Loss (KL 散度)
-        td_errors = -(m * log_p_a).sum(dim=1)
-        loss = (weights * td_errors).mean()
+            # 5. 取得當前狀態下，實際執行動作的預測 Log 機率
+            log_p = self.online_net(states).float()
+            log_p_a = log_p[range(batch_size), actions]
+            
+            # 6. 計算 Cross Entropy Loss (KL 散度)
+            td_errors = -(m * log_p_a).sum(dim=1)
+            loss = (weights * td_errors).mean()
 
         self.optimizer.zero_grad()
         loss.backward()
