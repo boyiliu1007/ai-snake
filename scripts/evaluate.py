@@ -7,7 +7,6 @@ Usage:
 """
 import argparse
 import sys
-import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -31,7 +30,7 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    env = SnakeEnv(grid_size=args.grid, render_mode="human", egocentric=args.egocentric)
+    env = SnakeEnv(grid_size=args.grid, render_mode="human", egocentric=args.egocentric, render_fps=args.fps)
     in_channels, n_flags = obs_shape_config(args.egocentric)
     agent = RainbowAgent(
         in_channels=in_channels,
@@ -56,7 +55,6 @@ def main() -> None:
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             ep_reward += reward
-            time.sleep(1.0 / args.fps)
 
         score = info["score"]
         scores.append(score)

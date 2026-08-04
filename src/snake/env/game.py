@@ -95,6 +95,13 @@ class SnakeGame:
         if ate_food:
             self.score += 1
             self.steps_since_meal = 0
+            # Board fully occupied — no cell left to place new food on, so the
+            # game is won here. Stop now rather than let _place_food() leave a
+            # stale food marker inside the snake's own body.
+            if len(self.snake) >= self.grid_size * self.grid_size:
+                self._done = True
+                reward = self._step_reward(ate_food, old_head)
+                return reward, True, False, self._info()
             self._place_food()
         else:
             self.snake.pop()

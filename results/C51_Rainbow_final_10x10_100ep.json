@@ -1,0 +1,819 @@
+{
+  "summary": {
+    "checkpoint": "runs/C51_Rainbow/final.pt",
+    "grid_size": 10,
+    "n_episodes": 100,
+    "train_steps": null,
+    "success_rate_pct": 75.0,
+    "n_solved": 75,
+    "mean_score": 85.36,
+    "std_score": 22.9170329667695,
+    "max_score": 98,
+    "min_score": 23,
+    "mean_length": 88.36,
+    "mean_steps": 1125.25,
+    "eval_wall_time_sec": 112.34380006790161
+  },
+  "episodes": [
+    {
+      "episode": 0,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1384,
+      "reward": 90.23712158203125,
+      "solved": true
+    },
+    {
+      "episode": 1,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1253,
+      "reward": 91.05712127685547,
+      "solved": true
+    },
+    {
+      "episode": 2,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1136,
+      "reward": 91.52555847167969,
+      "solved": true
+    },
+    {
+      "episode": 3,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1346,
+      "reward": 90.08772277832031,
+      "solved": true
+    },
+    {
+      "episode": 4,
+      "score": 34,
+      "snake_length": 37,
+      "steps": 371,
+      "reward": 31.365337371826172,
+      "solved": false
+    },
+    {
+      "episode": 5,
+      "score": 43,
+      "snake_length": 46,
+      "steps": 448,
+      "reward": 40.01789093017578,
+      "solved": false
+    },
+    {
+      "episode": 6,
+      "score": 42,
+      "snake_length": 45,
+      "steps": 489,
+      "reward": 38.78219985961914,
+      "solved": false
+    },
+    {
+      "episode": 7,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1264,
+      "reward": 90.71553802490234,
+      "solved": true
+    },
+    {
+      "episode": 8,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1283,
+      "reward": 90.2995834350586,
+      "solved": true
+    },
+    {
+      "episode": 9,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1308,
+      "reward": 90.36666107177734,
+      "solved": true
+    },
+    {
+      "episode": 10,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1178,
+      "reward": 91.24763488769531,
+      "solved": true
+    },
+    {
+      "episode": 11,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1294,
+      "reward": 90.3580093383789,
+      "solved": true
+    },
+    {
+      "episode": 12,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1434,
+      "reward": 89.93812561035156,
+      "solved": true
+    },
+    {
+      "episode": 13,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1266,
+      "reward": 90.88653564453125,
+      "solved": true
+    },
+    {
+      "episode": 14,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1249,
+      "reward": 90.97295379638672,
+      "solved": true
+    },
+    {
+      "episode": 15,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1244,
+      "reward": 90.81709289550781,
+      "solved": true
+    },
+    {
+      "episode": 16,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1412,
+      "reward": 89.84905242919922,
+      "solved": true
+    },
+    {
+      "episode": 17,
+      "score": 50,
+      "snake_length": 53,
+      "steps": 670,
+      "reward": 45.78556823730469,
+      "solved": false
+    },
+    {
+      "episode": 18,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1310,
+      "reward": 90.19351196289062,
+      "solved": true
+    },
+    {
+      "episode": 19,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1284,
+      "reward": 90.6733627319336,
+      "solved": true
+    },
+    {
+      "episode": 20,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1389,
+      "reward": 89.90428924560547,
+      "solved": true
+    },
+    {
+      "episode": 21,
+      "score": 97,
+      "snake_length": 100,
+      "steps": 1446,
+      "reward": 88.5721206665039,
+      "solved": true
+    },
+    {
+      "episode": 22,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1325,
+      "reward": 90.28114318847656,
+      "solved": true
+    },
+    {
+      "episode": 23,
+      "score": 44,
+      "snake_length": 47,
+      "steps": 504,
+      "reward": 40.68770980834961,
+      "solved": false
+    },
+    {
+      "episode": 24,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1493,
+      "reward": 89.32393646240234,
+      "solved": true
+    },
+    {
+      "episode": 25,
+      "score": 30,
+      "snake_length": 33,
+      "steps": 296,
+      "reward": 27.75255584716797,
+      "solved": false
+    },
+    {
+      "episode": 26,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1195,
+      "reward": 90.95320129394531,
+      "solved": true
+    },
+    {
+      "episode": 27,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1195,
+      "reward": 91.32601165771484,
+      "solved": true
+    },
+    {
+      "episode": 28,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1264,
+      "reward": 90.62728118896484,
+      "solved": true
+    },
+    {
+      "episode": 29,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1283,
+      "reward": 90.65995788574219,
+      "solved": true
+    },
+    {
+      "episode": 30,
+      "score": 44,
+      "snake_length": 47,
+      "steps": 583,
+      "reward": 40.17448806762695,
+      "solved": false
+    },
+    {
+      "episode": 31,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1168,
+      "reward": 91.1666259765625,
+      "solved": true
+    },
+    {
+      "episode": 32,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1320,
+      "reward": 90.56387329101562,
+      "solved": true
+    },
+    {
+      "episode": 33,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1289,
+      "reward": 90.77364349365234,
+      "solved": true
+    },
+    {
+      "episode": 34,
+      "score": 47,
+      "snake_length": 50,
+      "steps": 639,
+      "reward": 42.86892318725586,
+      "solved": false
+    },
+    {
+      "episode": 35,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1207,
+      "reward": 90.97052764892578,
+      "solved": true
+    },
+    {
+      "episode": 36,
+      "score": 23,
+      "snake_length": 26,
+      "steps": 187,
+      "reward": 21.288236618041992,
+      "solved": false
+    },
+    {
+      "episode": 37,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1337,
+      "reward": 90.42877197265625,
+      "solved": true
+    },
+    {
+      "episode": 38,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1412,
+      "reward": 89.79887390136719,
+      "solved": true
+    },
+    {
+      "episode": 39,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1304,
+      "reward": 90.49730682373047,
+      "solved": true
+    },
+    {
+      "episode": 40,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1328,
+      "reward": 90.44418334960938,
+      "solved": true
+    },
+    {
+      "episode": 41,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1404,
+      "reward": 89.97950744628906,
+      "solved": true
+    },
+    {
+      "episode": 42,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1226,
+      "reward": 91.01030731201172,
+      "solved": true
+    },
+    {
+      "episode": 43,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1106,
+      "reward": 91.62081909179688,
+      "solved": true
+    },
+    {
+      "episode": 44,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1263,
+      "reward": 90.55901336669922,
+      "solved": true
+    },
+    {
+      "episode": 45,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1309,
+      "reward": 90.5295639038086,
+      "solved": true
+    },
+    {
+      "episode": 46,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1198,
+      "reward": 91.29588317871094,
+      "solved": true
+    },
+    {
+      "episode": 47,
+      "score": 46,
+      "snake_length": 49,
+      "steps": 560,
+      "reward": 42.385223388671875,
+      "solved": false
+    },
+    {
+      "episode": 48,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1277,
+      "reward": 90.89810943603516,
+      "solved": true
+    },
+    {
+      "episode": 49,
+      "score": 36,
+      "snake_length": 39,
+      "steps": 357,
+      "reward": 33.4641227722168,
+      "solved": false
+    },
+    {
+      "episode": 50,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1299,
+      "reward": 90.54780578613281,
+      "solved": true
+    },
+    {
+      "episode": 51,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1269,
+      "reward": 90.61773681640625,
+      "solved": true
+    },
+    {
+      "episode": 52,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1351,
+      "reward": 90.41990661621094,
+      "solved": true
+    },
+    {
+      "episode": 53,
+      "score": 42,
+      "snake_length": 45,
+      "steps": 402,
+      "reward": 39.24456024169922,
+      "solved": false
+    },
+    {
+      "episode": 54,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1291,
+      "reward": 90.76087188720703,
+      "solved": true
+    },
+    {
+      "episode": 55,
+      "score": 39,
+      "snake_length": 42,
+      "steps": 379,
+      "reward": 36.40994644165039,
+      "solved": false
+    },
+    {
+      "episode": 56,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1375,
+      "reward": 90.0472640991211,
+      "solved": true
+    },
+    {
+      "episode": 57,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1263,
+      "reward": 91.02889251708984,
+      "solved": true
+    },
+    {
+      "episode": 58,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1458,
+      "reward": 89.40694427490234,
+      "solved": true
+    },
+    {
+      "episode": 59,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1339,
+      "reward": 90.34265899658203,
+      "solved": true
+    },
+    {
+      "episode": 60,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1302,
+      "reward": 90.51615142822266,
+      "solved": true
+    },
+    {
+      "episode": 61,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1296,
+      "reward": 90.5355453491211,
+      "solved": true
+    },
+    {
+      "episode": 62,
+      "score": 50,
+      "snake_length": 53,
+      "steps": 575,
+      "reward": 46.30022048950195,
+      "solved": false
+    },
+    {
+      "episode": 63,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1291,
+      "reward": 90.4176025390625,
+      "solved": true
+    },
+    {
+      "episode": 64,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1371,
+      "reward": 90.12580108642578,
+      "solved": true
+    },
+    {
+      "episode": 65,
+      "score": 68,
+      "snake_length": 71,
+      "steps": 854,
+      "reward": 62.76652526855469,
+      "solved": false
+    },
+    {
+      "episode": 66,
+      "score": 79,
+      "snake_length": 82,
+      "steps": 1228,
+      "reward": 72.09822082519531,
+      "solved": false
+    },
+    {
+      "episode": 67,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1153,
+      "reward": 91.37150573730469,
+      "solved": true
+    },
+    {
+      "episode": 68,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1122,
+      "reward": 91.46420288085938,
+      "solved": true
+    },
+    {
+      "episode": 69,
+      "score": 60,
+      "snake_length": 63,
+      "steps": 1351,
+      "reward": 51.28287887573242,
+      "solved": false
+    },
+    {
+      "episode": 70,
+      "score": 83,
+      "snake_length": 86,
+      "steps": 1106,
+      "reward": 76.32392883300781,
+      "solved": false
+    },
+    {
+      "episode": 71,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1431,
+      "reward": 89.89863586425781,
+      "solved": true
+    },
+    {
+      "episode": 72,
+      "score": 52,
+      "snake_length": 55,
+      "steps": 806,
+      "reward": 46.93107223510742,
+      "solved": false
+    },
+    {
+      "episode": 73,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1375,
+      "reward": 90.42293548583984,
+      "solved": true
+    },
+    {
+      "episode": 74,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1217,
+      "reward": 90.86629486083984,
+      "solved": true
+    },
+    {
+      "episode": 75,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1242,
+      "reward": 90.9720687866211,
+      "solved": true
+    },
+    {
+      "episode": 76,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1225,
+      "reward": 91.01353454589844,
+      "solved": true
+    },
+    {
+      "episode": 77,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1195,
+      "reward": 91.23294067382812,
+      "solved": true
+    },
+    {
+      "episode": 78,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1254,
+      "reward": 90.79651641845703,
+      "solved": true
+    },
+    {
+      "episode": 79,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1339,
+      "reward": 90.2693099975586,
+      "solved": true
+    },
+    {
+      "episode": 80,
+      "score": 58,
+      "snake_length": 61,
+      "steps": 731,
+      "reward": 53.32499313354492,
+      "solved": false
+    },
+    {
+      "episode": 81,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1391,
+      "reward": 90.07962036132812,
+      "solved": true
+    },
+    {
+      "episode": 82,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1388,
+      "reward": 90.21928405761719,
+      "solved": true
+    },
+    {
+      "episode": 83,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1302,
+      "reward": 90.1190414428711,
+      "solved": true
+    },
+    {
+      "episode": 84,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1308,
+      "reward": 90.38887786865234,
+      "solved": true
+    },
+    {
+      "episode": 85,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1361,
+      "reward": 90.03978729248047,
+      "solved": true
+    },
+    {
+      "episode": 86,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1304,
+      "reward": 90.73765563964844,
+      "solved": true
+    },
+    {
+      "episode": 87,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1330,
+      "reward": 90.34581756591797,
+      "solved": true
+    },
+    {
+      "episode": 88,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1451,
+      "reward": 89.88934326171875,
+      "solved": true
+    },
+    {
+      "episode": 89,
+      "score": 37,
+      "snake_length": 40,
+      "steps": 421,
+      "reward": 34.16701126098633,
+      "solved": false
+    },
+    {
+      "episode": 90,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1240,
+      "reward": 90.93441772460938,
+      "solved": true
+    },
+    {
+      "episode": 91,
+      "score": 34,
+      "snake_length": 37,
+      "steps": 331,
+      "reward": 31.63976287841797,
+      "solved": false
+    },
+    {
+      "episode": 92,
+      "score": 46,
+      "snake_length": 49,
+      "steps": 530,
+      "reward": 42.5994758605957,
+      "solved": false
+    },
+    {
+      "episode": 93,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1334,
+      "reward": 90.27986145019531,
+      "solved": true
+    },
+    {
+      "episode": 94,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1332,
+      "reward": 90.72660827636719,
+      "solved": true
+    },
+    {
+      "episode": 95,
+      "score": 48,
+      "snake_length": 51,
+      "steps": 453,
+      "reward": 45.05101776123047,
+      "solved": false
+    },
+    {
+      "episode": 96,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1242,
+      "reward": 90.84561920166016,
+      "solved": true
+    },
+    {
+      "episode": 97,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1464,
+      "reward": 89.79698181152344,
+      "solved": true
+    },
+    {
+      "episode": 98,
+      "score": 52,
+      "snake_length": 55,
+      "steps": 636,
+      "reward": 48.04710006713867,
+      "solved": false
+    },
+    {
+      "episode": 99,
+      "score": 98,
+      "snake_length": 101,
+      "steps": 1330,
+      "reward": 90.24893951416016,
+      "solved": true
+    }
+  ]
+}

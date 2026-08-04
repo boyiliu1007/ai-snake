@@ -29,10 +29,12 @@ class SnakeEnv(gym.Env):
         max_steps_no_food: Optional[int] = None,
         render_mode: Optional[str] = None,
         egocentric: bool = False,
+        render_fps: int = 10,
     ):
         super().__init__()
         self.grid_size = grid_size
         self.render_mode = render_mode
+        self.render_fps = render_fps
         self.egocentric = egocentric
 
         # Egocentric mode drops the two t-1 channels and adds 3 danger-flag planes.
@@ -119,6 +121,7 @@ class SnakeEnv(gym.Env):
             step=self._game.steps,
             reward=self._last_reward,
             episode_reward=self._episode_reward,
+            fps=self.render_fps,
         )
 
     def close(self) -> None:
