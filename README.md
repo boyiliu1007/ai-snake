@@ -1,6 +1,6 @@
 # AI Snake — Rainbow DQN
 
-A Snake agent trained from scratch with a **full Rainbow DQN** on a 12×12 grid,
+A Snake agent trained from scratch with a **full Rainbow DQN** on a 10×10 grid,
 using a CNN over a 7-channel board representation and 32 parallel environments
 for fast experience collection.
 
