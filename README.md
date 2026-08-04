@@ -6,9 +6,9 @@ for fast experience collection.
 
 ## Demo
 
-<p align="center">
-  <video src="(https://github.com/user-attachments/assets/d93d370c-01ce-4c67-965b-f3df6a2b4594)" width="100%" controls autoplay loop muted></video>
-</p>
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/b0bd7cca-dc5b-4b00-b391-40996216edab" width="100%"></video>
+</div>
 
 ---
 
