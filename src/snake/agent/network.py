@@ -9,14 +9,18 @@ class _CNN(nn.Module):
     def __init__(self, in_channels: int, grid_size: int):
         super().__init__()
         self.net = nn.Sequential(
-            nn.Conv2d(in_channels, 32, kernel_size=3, padding=1),
+            nn.Conv2d(in_channels, 32, kernel_size=3, padding_mode='replicate', padding=1, stride=1),
             nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2),
+            nn.Conv2d(32, 64, kernel_size=3, padding_mode='replicate', padding=1, stride=2),
             nn.ReLU(),
-            nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            nn.Conv2d(64, 64, kernel_size=3, padding_mode='replicate', padding=1, stride=1),
             nn.ReLU(),
+            nn.Conv2d(64, 128, kernel_size=3, padding_mode='replicate', stride=1),
+            nn.ReLU(),
+
+            nn.AdaptiveMaxPool2d((3, 3)),
             nn.Flatten(),
-            nn.Linear(64 * (grid_size // 2) * (grid_size // 2), 256),
+            nn.Linear(128 * 3 * 3, 256),
             nn.ReLU(),
         )
         self.out_dim = 256
@@ -78,25 +82,31 @@ class NoisyLinear(nn.Module):
 
 
 class RainbowNet(nn.Module):
-    """CNN + Dueling NoisyLinear heads + C51 Distributional Output."""
+    """CNN + Dueling NoisyLinear heads + C51 distributional output.
 
-    # 🔧 新增 n_atoms 參數
-    def __init__(self, in_channels: int, n_actions: int, grid_size: int, n_atoms: int = 51):
+    If ``n_flags > 0`` the input carries that many extra constant "danger-flag"
+    planes appended after the spatial channels. They bypass the CNN and are
+    concatenated straight onto the flattened features, so they reach the dueling
+    heads directly (aligned with the action outputs) instead of being smeared
+    through the convolutions.
+    """
+
+    def __init__(self, in_channels: int, n_actions: int, grid_size: int,
+                 n_atoms: int = 51, n_flags: int = 0):
         super().__init__()
         self.n_actions = n_actions
         self.n_atoms = n_atoms
-        
-        self.cnn = _CNN(in_channels, grid_size)
-        feat = self.cnn.out_dim
+        self.spatial_channels = in_channels
+        self.n_flags = n_flags
 
-        # 🔧 Value stream 現在輸出 n_atoms 個特徵
+        self.cnn = _CNN(in_channels, grid_size)
+        feat = self.cnn.out_dim + n_flags  # flags concatenated post-CNN
+
         self.value_stream = nn.Sequential(
             NoisyLinear(feat, 256),
             nn.ReLU(),
             NoisyLinear(256, n_atoms),
         )
-        
-        # 🔧 Advantage stream 輸出 n_actions * n_atoms 個特徵
         self.advantage_stream = nn.Sequential(
             NoisyLinear(feat, 256),
             nn.ReLU(),
@@ -105,18 +115,21 @@ class RainbowNet(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size = x.size(0)
-        features = self.cnn(x)
-        
-        # 形狀轉換：(Batch, n_atoms) -> (Batch, 1, n_atoms)
+
+        if self.n_flags > 0:
+            spatial = x[:, : self.spatial_channels]
+            # Flag planes are constant, so any cell holds the value — read a corner.
+            flags = x[:, self.spatial_channels :, 0, 0]      # (B, n_flags)
+            features = self.cnn(spatial)
+            features = torch.cat([features, flags], dim=1)
+        else:
+            features = self.cnn(x)
+
         value = self.value_stream(features).view(batch_size, 1, self.n_atoms)
-        
-        # 形狀轉換：(Batch, n_actions * n_atoms) -> (Batch, n_actions, n_atoms)
         advantage = self.advantage_stream(features).view(batch_size, self.n_actions, self.n_atoms)
-        
-        # Dueling 結合：(Batch, n_actions, n_atoms)
+
+        # Dueling combination, then log-probabilities over the C51 atoms
         q_atoms = value + advantage - advantage.mean(dim=1, keepdim=True)
-        
-        # 🔧 透過 log_softmax 將 51 個輸出轉為機率分佈 (Log Probabilities)
         return F.log_softmax(q_atoms, dim=2)
 
     def reset_noise(self) -> None:

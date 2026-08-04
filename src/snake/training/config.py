@@ -5,13 +5,14 @@ from pathlib import Path
 @dataclass
 class RainbowConfig:
     # ---- Environment ----
-    grid_size: int = 12
-    max_steps_no_food: int = 144        # grid_size² — truncates circling episodes
+    grid_size: int = 10
+    max_steps_no_food: int = grid_size ** 2 * 2  # grid_size² — truncates circling episodes
+    egocentric: bool = False            # rotate obs to heading-up + 3 relative actions
 
     # ---- Training schedule ----
-    total_steps: int = 4_000_000
+    total_steps: int = 20_000_000
     warmup_steps: int = 10_000        # steps before first gradient update
-    batch_size: int = 128
+    batch_size: int = 512
     train_freq: int = 1              # gradient steps per env step
 
     # ---- Network ----
@@ -20,16 +21,16 @@ class RainbowConfig:
     # ---- RL ----
     gamma: float = 0.99
     n_step: int = 5
-    v_min: float = -2.0      # 預期的最低 Q-value (死亡懲罰是 -1.0，所以設 -2.0 很安全)
-    v_max: float = 15.0      # 預期的最高 Q-value (考慮到 gamma 折扣，15.0 足以涵蓋後期分數)
+    v_min: float = -10.0      # 預期的最低 Q-value (死亡懲罰是 -1.0，所以設 -2.0 很安全)
+    v_max: float = 150.0      # 預期的最高 Q-value (考慮到 gamma 折扣，15.0 足以涵蓋後期分數)
     n_atoms: int = 51        # 將分數區間切成 51 個柱狀圖
 
     # ---- PER ----
-    buffer_capacity: int = 500_000
+    buffer_capacity: int = 2_000_000
     per_alpha: float = 0.6
     per_beta_start: float = 0.4
     per_beta_end: float = 1.0
-    per_beta_steps: int = 3_000_000    # anneal beta over this many env steps
+    per_beta_steps: int = 15_000_000    # anneal beta over this many env steps
 
     # ---- Exploration (ε-greedy) ----
     epsilon_start: float = 1.0
@@ -44,7 +45,7 @@ class RainbowConfig:
     eval_freq: int = 25_000          # run evaluator every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/C51_Rainbow"
+    run_dir: str = "runs/20M_ultimate_10x10"  # where to save checkpoints and TensorBoard logs
 
     def epsilon(self, step: int) -> float:
         frac = min(step / self.epsilon_decay_steps, 1.0)
@@ -55,7 +56,7 @@ class RainbowConfig:
         return self.per_beta_start + frac * (self.per_beta_end - self.per_beta_start)
 
     def learning_rate(self, step: int) -> float:
-        decay_start = 1_000_000
+        decay_start = 5_000_000
         if step <= decay_start:
             return self.lr
         decay_duration = max(1, self.total_steps - decay_start)

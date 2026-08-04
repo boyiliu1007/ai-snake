@@ -8,13 +8,14 @@ class SnakeRenderer:
     STATS_H = 60         # pixel height of the stats bar
 
     _COLORS = {
-        "bg":      (10,  10,  10),
-        "grid":    (28,  28,  28),
-        "food":    (220, 60,  60),
-        "head":    (60,  180, 240),
-        "body":    (30,  110, 190),
-        "text":    (220, 220, 220),
-        "label":   (140, 140, 140),
+        "bg":         (10,  10,  10),
+        "grid":       (28,  28,  28),
+        "food":       (220, 60,  60),
+        "head":       (60,  180, 240),
+        "body_start": (60,  180, 240),   # gradient start, just behind the head (blue)
+        "body_end":   (80,  220, 120),   # gradient end, at the tail (green)
+        "text":       (220, 220, 220),
+        "label":      (140, 140, 140),
     }
 
     def __init__(self, grid_size: int = 12):
@@ -82,10 +83,19 @@ class SnakeRenderer:
         pygame.draw.ellipse(self.screen, self._COLORS["food"], rect)
 
     def _draw_snake(self, snake: deque) -> None:
+        n_body = len(snake) - 1
         for i, (r, c) in enumerate(snake):
-            color = self._COLORS["head"] if i == 0 else self._COLORS["body"]
+            if i == 0:
+                color = self._COLORS["head"]
+            else:
+                t = (i - 1) / n_body if n_body > 1 else 0.0
+                color = self._lerp_color(self._COLORS["body_start"], self._COLORS["body_end"], t)
             rect = self._cell_rect(r, c, margin=3)
             pygame.draw.rect(self.screen, color, rect, border_radius=5)
+
+    @staticmethod
+    def _lerp_color(c1: tuple, c2: tuple, t: float) -> tuple:
+        return tuple(int(a + (b - a) * t) for a, b in zip(c1, c2))
 
     def _draw_stats(
         self,

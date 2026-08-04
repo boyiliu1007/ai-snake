@@ -15,15 +15,17 @@ class Evaluator:
         grid_size: int,
         n_episodes: int = 10,
         max_steps_no_food: int = None,
+        egocentric: bool = False,
     ):
         self.agent = agent
         self.n_episodes = n_episodes
         # Separate env with no rendering so eval doesn't affect training display.
-        # Match the training truncation limit so eval numbers are comparable.
+        # Match the training truncation limit and obs format so eval is comparable.
         self._env = SnakeEnv(
             grid_size=grid_size,
             max_steps_no_food=max_steps_no_food,
             render_mode=None,
+            egocentric=egocentric,
         )
 
     def evaluate(self) -> dict:

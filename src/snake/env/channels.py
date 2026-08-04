@@ -6,6 +6,19 @@ import numpy as np
 N_CHANNELS = 7
 
 
+def obs_shape_config(egocentric: bool) -> tuple[int, int]:
+    """
+    Return (n_spatial, n_flags) for the given mode.
+
+    Absolute mode: all 7 spatial channels, no flags.
+    Egocentric mode: drop the two t-1 channels (5, 6) — redundant once the board
+    is rotated heading-up — and add 3 heading-relative danger-flag planes.
+    """
+    if egocentric:
+        return 5, 3
+    return N_CHANNELS, 0
+
+
 def _head_channel(snake: deque, grid_size: int) -> np.ndarray:
     ch = np.zeros((grid_size, grid_size), dtype=np.float32)
     r, c = snake[0]
@@ -85,6 +98,16 @@ def _flood_fill(snake: deque, grid_size: int) -> np.ndarray:
 # ------------------------------------------------------------------
 # Public API
 # ------------------------------------------------------------------
+
+def to_egocentric(obs: np.ndarray, direction: int) -> np.ndarray:
+    """
+    Rotate a (C, H, W) observation so the snake's heading always points 'up'.
+    All channels rotate together, preserving spatial relationships. This exploits
+    Snake's rotation symmetry so the network sees a single canonical orientation.
+    """
+    from snake.env.game import EGOCENTRIC_ROT
+    return np.rot90(obs, k=EGOCENTRIC_ROT[direction], axes=(1, 2)).copy()
+
 
 def build_channels(
     snake: deque,

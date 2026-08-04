@@ -2,7 +2,7 @@ from collections import deque
 from typing import Optional
 import random
 
-GRID_SIZE = 12
+GRID_SIZE = 10
 DEATH_LAMBDA = 1   # peak death penalty  (grid empty, length=3 → ~-9.8)
 DEATH_MIN    = 1.0    # floor death penalty (grid full  → -1.0)
 TRUNC_LAMBDA = 1   # peak truncation penalty
@@ -11,6 +11,13 @@ TRUNC_MIN    = 0.1    # floor truncation penalty
 UP, DOWN, LEFT, RIGHT = 0, 1, 2, 3
 _DELTA = {UP: (-1, 0), DOWN: (1, 0), LEFT: (0, -1), RIGHT: (0, 1)}
 _OPPOSITE = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
+
+# Heading-relative turns (from the snake's own point of view)
+LEFT_TURN = {UP: LEFT, LEFT: DOWN, DOWN: RIGHT, RIGHT: UP}
+RIGHT_TURN = {UP: RIGHT, RIGHT: DOWN, DOWN: LEFT, LEFT: UP}
+
+# Number of CCW 90° rotations that make the current heading point "up"
+EGOCENTRIC_ROT = {UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3}
 
 
 class SnakeGame:
@@ -88,6 +95,13 @@ class SnakeGame:
         if ate_food:
             self.score += 1
             self.steps_since_meal = 0
+            # Board fully occupied — no cell left to place new food on, so the
+            # game is won here. Stop now rather than let _place_food() leave a
+            # stale food marker inside the snake's own body.
+            if len(self.snake) >= self.grid_size * self.grid_size:
+                self._done = True
+                reward = self._step_reward(ate_food, old_head)
+                return reward, True, False, self._info()
             self._place_food()
         else:
             self.snake.pop()
@@ -127,12 +141,36 @@ class SnakeGame:
             # return 1.0 + 0.05 * len(self.snake)
             return 1.0
 
-        # old_dist = abs(old_head[0] - self.food[0]) + abs(old_head[1] - self.food[1])
-        # new_dist = abs(self.snake[0][0] - self.food[0]) + abs(self.snake[0][1] - self.food[1])
-        # return 0.01 * (old_dist - new_dist)
+        # occupancy = len(self.snake) / (self.grid_size * self.grid_size)
 
-        return -0.01 # discourage unnecessary moves at the start of the game
-    
+        # penalty = min(-0.002, -0.01 * (1.0 - occupancy))
+
+        # return penalty # discourage unnecessary moves at the start of the game
+        return -0.01
+
+    def relative_safety(self) -> tuple[float, float, float]:
+        """
+        Safety of each heading-relative move, ordered to match the egocentric
+        action space: (turn-left, straight, turn-right).
+        1.0 = safe to enter, 0.0 = immediate death (wall or body).
+        Uses the same collision rule as step() — the tail is excluded because it
+        moves away this step.
+        """
+        d = self.direction
+        hr, hc = self.snake[0]
+        body = set(list(self.snake)[:-1])
+        flags = []
+        for absolute in (LEFT_TURN[d], d, RIGHT_TURN[d]):
+            dr, dc = _DELTA[absolute]
+            nr, nc = hr + dr, hc + dc
+            safe = (
+                0 <= nr < self.grid_size
+                and 0 <= nc < self.grid_size
+                and (nr, nc) not in body
+            )
+            flags.append(1.0 if safe else 0.0)
+        return tuple(flags)
+
     def _info(self) -> dict:
         return {
             "snake_length": len(self.snake),
