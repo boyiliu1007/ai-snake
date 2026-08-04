@@ -6,13 +6,9 @@ for fast experience collection.
 
 ## Demo
 
-<!-- Drop a recording at assets/demo.gif (or .mp4) and it will render here. -->
-
-![Snake agent demo](assets/demo.gif)
-
-> To record your own: run `python scripts/evaluate.py --checkpoint <ckpt>.pt`
-> to open the Pygame window, capture it with any screen recorder, and save the
-> clip to `assets/demo.gif`.
+<p align="center">
+  <video src="[PASTE_YOUR_GITHUB_ASSET_URL_HERE](https://github.com/user-attachments/assets/d93d370c-01ce-4c67-965b-f3df6a2b4594)" width="100%" controls autoplay loop muted></video>
+</p>
 
 ---
 
