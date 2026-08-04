@@ -7,7 +7,7 @@ for fast experience collection.
 ## Demo
 
 <p align="center">
-  <video src="[PASTE_YOUR_GITHUB_ASSET_URL_HERE](https://github.com/user-attachments/assets/d93d370c-01ce-4c67-965b-f3df6a2b4594)" width="100%" controls autoplay loop muted></video>
+  <video src="(https://github.com/user-attachments/assets/d93d370c-01ce-4c67-965b-f3df6a2b4594)" width="100%" controls autoplay loop muted></video>
 </p>
 
 ---
