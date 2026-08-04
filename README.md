@@ -6,9 +6,7 @@ for fast experience collection.
 
 ## Demo
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/b0bd7cca-dc5b-4b00-b391-40996216edab" width="100%"></video>
-</div>
+<img width="500" height="575" alt="Image" src="https://github.com/user-attachments/assets/2a12bc0e-d0a7-4afb-af93-27ce4d5c5687" />
 
 ---
 
