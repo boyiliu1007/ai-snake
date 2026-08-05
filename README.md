@@ -1,18 +1,12 @@
 # AI Snake — Rainbow DQN
 
-A Snake agent trained from scratch with a **full Rainbow DQN** on a 12×12 grid,
-using a CNN over a 7-channel board representation and 32 parallel environments
+A Snake agent trained from scratch with a **full Rainbow DQN** on a 10×10 grid,
+using a CNN over a 7-channel board representation and 128 parallel environments
 for fast experience collection.
 
 ## Demo
 
-<!-- Drop a recording at assets/demo.gif (or .mp4) and it will render here. -->
-
-![Snake agent demo](assets/demo.gif)
-
-> To record your own: run `python scripts/evaluate.py --checkpoint <ckpt>.pt`
-> to open the Pygame window, capture it with any screen recorder, and save the
-> clip to `assets/demo.gif`.
+<img width="500" height="575" alt="Image" src="https://github.com/user-attachments/assets/2a12bc0e-d0a7-4afb-af93-27ce4d5c5687" />
 
 ---
 
