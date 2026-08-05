@@ -28,7 +28,7 @@ class Trainer:
         cfg = self.cfg
         
         print("\n" + "="*60)
-        print("🚀 Training Configuration")
+        print("Training Configuration")
         print("="*60)
         print(f"Total Steps:        {cfg.total_steps:,}")
         print(f"Batch Size:         {cfg.batch_size}")
