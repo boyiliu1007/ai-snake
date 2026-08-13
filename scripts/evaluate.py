@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from snake.agent.rainbow import RainbowAgent
+from snake.training.config import RainbowConfig
 from snake.env.channels import obs_shape_config
 from snake.env.snake_env import SnakeEnv
 
@@ -21,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--checkpoint", type=str, required=True)
     p.add_argument("--episodes",   type=int, default=10)
     p.add_argument("--fps",        type=int, default=30)
-    p.add_argument("--grid",       type=int, default=10)
+    p.add_argument("--grid",       type=int, default=12)
     p.add_argument("--egocentric", action="store_true",
                    help="Must match how the checkpoint was trained")
     return p.parse_args()
@@ -29,6 +30,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    cfg = RainbowConfig(egocentric=args.egocentric)
 
     env = SnakeEnv(grid_size=args.grid, render_mode="human", egocentric=args.egocentric, render_fps=args.fps)
     in_channels, n_flags = obs_shape_config(args.egocentric)
@@ -36,9 +38,14 @@ def main() -> None:
         in_channels=in_channels,
         n_actions=int(env.action_space.n),
         grid_size=args.grid,
-        v_min=-2,
-        v_max=15,
-        n_atoms=51,
+        buffer_capacity=cfg.buffer_capacity,
+        per_alpha=cfg.per_alpha,
+        n_step=cfg.n_step,
+        gamma=cfg.gamma,
+        lr=cfg.lr,
+        v_min=cfg.v_min,
+        v_max=cfg.v_max,
+        n_atoms=cfg.n_atoms,
         n_flags=n_flags,
     )
     agent.load(args.checkpoint)
