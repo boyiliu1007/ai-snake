@@ -6,7 +6,7 @@ class RainbowConfig:
     """Hyperparameters and configuration for the Rainbow DQN agent."""
     
     # ---- Environment ----
-    grid_size: int = 10
+    grid_size: int = 12
     max_steps_no_food: int = grid_size ** 2 * 2  # Truncates circling episodes
     egocentric: bool = False                     # Rotate obs to heading-up + 3 relative actions
 
@@ -24,8 +24,8 @@ class RainbowConfig:
     # ---- RL Parameters ----
     gamma: float = 0.99
     n_step: int = 5
-    v_min: float = -10.0                         # Minimum expected return for C51
-    v_max: float = 150.0                         # Maximum expected return for C51
+    v_min: float = -2.0                         # Minimum expected return for C51
+    v_max: float = 10.0                         # Maximum expected return for C51
     n_atoms: int = 51                            # Number of discrete atoms for C51 distribution
 
     # ---- Prioritized Experience Replay (PER) ----
@@ -43,7 +43,7 @@ class RainbowConfig:
     eval_freq: int = 25_000                      # Run greedy evaluation every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/20M_ultimate_10x10"      # Save directory for checkpoints and logs
+    run_dir: str = "runs/test"      # Save directory for checkpoints and logs
 
     def beta(self, step: int) -> float:
         """Calculate the linearly annealed beta value for PER IS-weights."""
