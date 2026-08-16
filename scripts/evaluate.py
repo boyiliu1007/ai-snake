@@ -21,7 +21,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser()
     p.add_argument("--checkpoint", type=str, required=True)
     p.add_argument("--episodes",   type=int, default=10)
-    p.add_argument("--fps",        type=int, default=500)
+    p.add_argument("--fps",        type=int, default=60)
     p.add_argument("--grid",       type=int, default=12)
     p.add_argument("--egocentric", action="store_true",
                    help="Must match how the checkpoint was trained")
@@ -32,7 +32,7 @@ def main() -> None:
     args = parse_args()
     cfg = RainbowConfig(egocentric=args.egocentric)
 
-    env = SnakeEnv(grid_size=args.grid, render_mode=None, egocentric=args.egocentric, render_fps=args.fps)
+    env = SnakeEnv(grid_size=args.grid, render_mode="human", egocentric=args.egocentric, render_fps=args.fps)
     in_channels, n_flags = obs_shape_config(args.egocentric)
     agent = RainbowAgent(
         in_channels=in_channels,
