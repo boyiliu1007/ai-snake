@@ -4,7 +4,7 @@ import numpy as np
 import gymnasium as gym
 from gymnasium import spaces
 
-from snake.env.game import SnakeGame, GRID_SIZE, LEFT_TURN, RIGHT_TURN
+from snake.env.game import SnakeGame, LEFT_TURN, RIGHT_TURN
 from snake.env.channels import (
     build_channels,
     to_egocentric,
@@ -25,7 +25,7 @@ class SnakeEnv(gym.Env):
 
     def __init__(
         self,
-        grid_size: int = GRID_SIZE,
+        grid_size: int,
         max_steps_no_food: Optional[int] = None,
         render_mode: Optional[str] = None,
         egocentric: bool = False,

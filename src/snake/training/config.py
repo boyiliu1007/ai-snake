@@ -1,68 +1,65 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
-
 
 @dataclass
 class RainbowConfig:
+    """Hyperparameters and configuration for the Rainbow DQN agent."""
+    
     # ---- Environment ----
-    grid_size: int = 10
-    max_steps_no_food: int = grid_size ** 2 * 2  # grid_size² — truncates circling episodes
-    egocentric: bool = False            # rotate obs to heading-up + 3 relative actions
+    grid_size: int = 12
+    max_steps_no_food: int = grid_size ** 2 * 2  # Truncates circling episodes
+    egocentric: bool = False                     # Rotate obs to heading-up + 3 relative actions
 
-    # ---- Training schedule ----
+    # ---- Training Schedule ----
     total_steps: int = 20_000_000
-    warmup_steps: int = 10_000        # steps before first gradient update
+    warmup_steps: int = 10_000                   # Steps before first gradient update
     batch_size: int = 512
-    train_freq: int = 1              # gradient steps per env step
+    train_freq: int = 1                          # Gradient steps per env step
 
     # ---- Network ----
     lr: float = 1e-4
     lr_end: float = 1e-5
-    # ---- RL ----
+    lr_decay_start: int = 10_000_000             # Start decaying learning rate after this many env steps
+
+    # ---- RL Parameters ----
     gamma: float = 0.99
     n_step: int = 5
-    v_min: float = -10.0      # 預期的最低 Q-value (死亡懲罰是 -1.0，所以設 -2.0 很安全)
-    v_max: float = 150.0      # 預期的最高 Q-value (考慮到 gamma 折扣，15.0 足以涵蓋後期分數)
-    n_atoms: int = 51        # 將分數區間切成 51 個柱狀圖
+    v_min: float = -2.0                         # Minimum expected return for C51
+    v_max: float = 10.0                         # Maximum expected return for C51
+    n_atoms: int = 51                            # Number of discrete atoms for C51 distribution
 
-    # ---- PER ----
+    # ---- Prioritized Experience Replay (PER) ----
     buffer_capacity: int = 2_000_000
     per_alpha: float = 0.6
     per_beta_start: float = 0.4
     per_beta_end: float = 1.0
-    per_beta_steps: int = 15_000_000    # anneal beta over this many env steps
+    per_beta_steps: int = 15_000_000             # Anneal beta linearly over this many env steps
 
-    # ---- Exploration (ε-greedy) ----
-    epsilon_start: float = 1.0
-    epsilon_end: float = 0.05
-    epsilon_decay_steps: int = 1_500_000
+    # ---- Target Network ----
+    target_update_freq: int = 5_000              # Hard target network update every N env steps
 
-    # ---- Target network ----
-    target_update_freq: int = 5_000  # hard update every N env steps
-
-    # ---- Logging / checkpointing ----
-    log_freq: int = 1_000            # log to TensorBoard every N steps
-    eval_freq: int = 25_000          # run evaluator every N steps
+    # ---- Logging & Checkpointing ----
+    log_freq: int = 1_000                        # Log metrics to TensorBoard every N steps
+    eval_freq: int = 25_000                      # Run greedy evaluation every N steps
     eval_episodes: int = 10
     checkpoint_freq: int = 50_000
-    run_dir: str = "runs/20M_ultimate_10x10"  # where to save checkpoints and TensorBoard logs
-
-    def epsilon(self, step: int) -> float:
-        frac = min(step / self.epsilon_decay_steps, 1.0)
-        return self.epsilon_start + frac * (self.epsilon_end - self.epsilon_start)
+    run_dir: str = "runs/test"      # Save directory for checkpoints and logs
 
     def beta(self, step: int) -> float:
+        """Calculate the linearly annealed beta value for PER IS-weights."""
         frac = min(step / self.per_beta_steps, 1.0)
         return self.per_beta_start + frac * (self.per_beta_end - self.per_beta_start)
 
     def learning_rate(self, step: int) -> float:
-        decay_start = 5_000_000
-        if step <= decay_start:
+        """Calculate the learning rate with a delayed linear decay."""
+        if step <= self.lr_decay_start:
             return self.lr
-        decay_duration = max(1, self.total_steps - decay_start)
-        frac = min((step - decay_start) / decay_duration, 1.0)
+            
+        decay_duration = max(1, self.total_steps - self.lr_decay_start)
+        frac = min((step - self.lr_decay_start) / decay_duration, 1.0)
         return self.lr + frac * (self.lr_end - self.lr)
-    
+        
     @property
     def run_path(self) -> Path:
+        """Get the Path object representing the run directory."""
         return Path(self.run_dir)

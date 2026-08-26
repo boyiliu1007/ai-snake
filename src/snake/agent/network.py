@@ -92,7 +92,7 @@ class RainbowNet(nn.Module):
     """
 
     def __init__(self, in_channels: int, n_actions: int, grid_size: int,
-                 n_atoms: int = 51, n_flags: int = 0):
+                 n_atoms: int, n_flags: int = 0):
         super().__init__()
         self.n_actions = n_actions
         self.n_atoms = n_atoms

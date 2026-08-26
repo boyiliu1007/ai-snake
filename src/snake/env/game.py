@@ -2,7 +2,6 @@ from collections import deque
 from typing import Optional
 import random
 
-GRID_SIZE = 10
 DEATH_LAMBDA = 1   # peak death penalty  (grid empty, length=3 → ~-9.8)
 DEATH_MIN    = 1.0    # floor death penalty (grid full  → -1.0)
 TRUNC_LAMBDA = 1   # peak truncation penalty
@@ -26,7 +25,7 @@ class SnakeGame:
     Snake deque: index 0 = head, index -1 = tail.
     """
 
-    def __init__(self, grid_size: int = GRID_SIZE, max_steps_no_food: Optional[int] = None, seed: Optional[int] = None):
+    def __init__(self, grid_size: int, max_steps_no_food: Optional[int] = None, seed: Optional[int] = None):
         self.grid_size = grid_size
         self.max_steps_no_food = max_steps_no_food if max_steps_no_food is not None else grid_size * grid_size * 4
         self._rng = random.Random(seed)
@@ -138,14 +137,8 @@ class SnakeGame:
 
     def _step_reward(self, ate_food: bool, old_head: tuple[int, int]) -> float:
         if ate_food:
-            # return 1.0 + 0.05 * len(self.snake)
             return 1.0
 
-        # occupancy = len(self.snake) / (self.grid_size * self.grid_size)
-
-        # penalty = min(-0.002, -0.01 * (1.0 - occupancy))
-
-        # return penalty # discourage unnecessary moves at the start of the game
         return -0.01
 
     def relative_safety(self) -> tuple[float, float, float]:
